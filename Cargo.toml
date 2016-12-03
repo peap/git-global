@@ -1,0 +1,6 @@
+[package]
+name = "git-global"
+version = "0.1.0"
+authors = ["Eric Petersen <eric@huskers.unl.edu>"]
+
+[dependencies]
