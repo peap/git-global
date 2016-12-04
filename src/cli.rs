@@ -4,7 +4,7 @@ use std::io::{Write, stderr};
 
 use clap::{Arg, App, SubCommand};
 
-use super::{Result, GitGlobalError, GitGlobalResult, get_repos, subcommands};
+use super::{GitGlobalError, GitGlobalResult, get_repos, subcommands};
 
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
@@ -38,29 +38,24 @@ pub fn run_from_command_line() -> i32 {
         None => subcommands::list::get_results(repos),
     };
     match results {
-        Ok(data) => {
-            show_results(data, use_json);
-            0
+        Ok(res) => {
+            show_results(res, use_json)
         }
         Err(err) => {
-            show_error(err, use_json);
-            1
+            show_error(err, use_json)
         }
     }
 }
 
-/// Run the subcommand given by the parsing matches.
-fn run_subcommand() -> Result<GitGlobalResult> {
-    Ok(GitGlobalResult::new())
-}
-
 /// Print out the subcommand results.
-fn show_results(results: GitGlobalResult, use_json: bool) {
-    println!("Hi :)");
+fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
+    results.print();
+    0
 }
 
 /// Print out an error.
-fn show_error(error: GitGlobalError, use_json: bool) {
+fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
     let r = writeln!(&mut stderr(), "{}", error);
     r.expect("failed printing to stderr");
+    1
 }

@@ -19,9 +19,26 @@ Use `git global <subcommand>` to:
 * `git global duplicates`: show repos that are checked out to multiple places
 * `git global remotes`: show all remotes (TODO: why? maybe filter by hostname?)
 
+Configuration
+-------------
+
+To change the behavior of `git-global`, you can do so with --- wait for it
+--- git global configuration!
+
+To set the base path for search to something other than your home directory:
+```
+git config --global global.basedir /some/path
+```
+
+To add patterns to exclude while walking directories:
+```
+git config --global global.ignore .cargo,.vim
+```
+
+
 Ideas
 -----
 
-* `git global scan`: search to git repos
-* `git global update`: update git repos list
+* `git global scan`: search for git repos and update cache
 * `git global monitor`: launch a daemon to watch git dirs with inotify
+* `git global pull`: pull down changes from default tracking branch for clean repos

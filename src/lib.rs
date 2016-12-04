@@ -2,6 +2,7 @@
 
 extern crate clap;
 extern crate git2;
+extern crate walkdir;
 
 mod cli;
 mod core;

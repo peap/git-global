@@ -10,3 +10,4 @@ doc = false
 [dependencies]
 clap = "2"
 git2 = "0.6"
+walkdir = "1"
