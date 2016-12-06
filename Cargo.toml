@@ -9,5 +9,8 @@ doc = false
 
 [dependencies]
 clap = "2"
-git2 = "0.6"
 walkdir = "1"
+
+[dependencies.git2]
+version = "0.6"
+default-features = false  # don't want SSH/HTTPS/Curl
