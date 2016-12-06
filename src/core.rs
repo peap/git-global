@@ -20,6 +20,10 @@ impl Repo {
     pub fn new(path: String) -> Repo {
         Repo { path: path }
     }
+
+    pub fn path(&self) -> String {
+        self.path.clone()
+    }
 }
 
 impl fmt::Display for Repo {
@@ -51,11 +55,29 @@ impl GitGlobalResult {
 
     pub fn print(&self) {
         for (repo, data) in self.data.iter() {
-            println!("* {}", repo);
+            println!("{}", repo);
             for line in data {
                 println!("{}", line);
             }
         }
+    }
+
+    pub fn print_json(&self) {
+        let mut json = object!{
+            "error" => false,
+            "results" => array![]
+        };
+        for (repo, data) in self.data.iter() {
+            json["results"].push(object!{
+                "path" => repo.path(),
+                "data" => array![]
+            }).expect("Failed pushing data to JSON results array.");
+            for line in data {
+                json["results"]["data"].push(line.to_string())
+                    .expect("Failed pushing data line to JSON data array.");
+            }
+        }
+        println!("{:#}", json);
     }
 }
 
@@ -113,7 +135,7 @@ pub fn get_repos() -> Vec<Repo> {
                     }
                 }
             }
-            Err(e) => (),
+            Err(_) => (),
         }
     }
     repos

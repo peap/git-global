@@ -35,6 +35,7 @@ impl Error for GitGlobalError {
 }
 
 impl From<io::Error> for GitGlobalError {
+    #[allow(unused_variables)]
     fn from(err: io::Error) -> GitGlobalError {
         GitGlobalError::Generic
     }

@@ -13,6 +13,7 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         .about("")
         .arg(
             Arg::with_name("json")
+                .long("json")
                 .help("Output results in JSON.")
         )
         .subcommand(
@@ -49,13 +50,24 @@ pub fn run_from_command_line() -> i32 {
 
 /// Print out the subcommand results.
 fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
-    results.print();
+    if use_json {
+        results.print_json();
+    } else {
+        results.print();
+    }
     0
 }
 
 /// Print out an error.
 fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
-    let r = writeln!(&mut stderr(), "{}", error);
-    r.expect("failed printing to stderr");
+    if use_json {
+        let json = object!{
+            "error" => true,
+            "message" => format!("{}", error)
+        };
+        writeln!(&mut stderr(), "{:#}", json).expect("failed write to STDERR");;
+    } else {
+        writeln!(&mut stderr(), "{}", error).expect("failed write to STDERR");
+    }
     1
 }
