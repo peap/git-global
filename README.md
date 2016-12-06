@@ -40,5 +40,8 @@ Ideas
 -----
 
 * `git global scan`: search for git repos and update cache
+* `git global add <path>`: add a git repo to the list that would not be found in a scan
+* `git global ignore <path>`: ignore a git repo and remove it from the list
+* `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
