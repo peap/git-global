@@ -10,23 +10,17 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
         .version(crate_version!())
         .author("Eric Petersen <eric@huskers.unl.edu>")
-        .about("")
-        .arg(
-            Arg::with_name("json")
-                .long("json")
-                .help("Output results in JSON.")
-        )
-        .subcommand(
-            SubCommand::with_name("list")
-                .about("lists all git repos on your machine [the default]")
-        )
-        .subcommand(
-            SubCommand::with_name("status")
-                .about("shows status of all git repos")
-        )
+        .about("git subcommand for working with all git repos on a machine")
+        .arg(Arg::with_name("json")
+            .long("json")
+            .help("Output results in JSON."))
+        .subcommand(SubCommand::with_name("list")
+            .about("lists all git repos on your machine [the default]"))
+        .subcommand(SubCommand::with_name("status")
+            .about("shows status of all git repos"))
 }
 
-/// Entry point for the `git-global` git subcommand.
+/// Entry point for the `git-global` git subcommand. Returns an exit code.
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
@@ -39,12 +33,8 @@ pub fn run_from_command_line() -> i32 {
         None => subcommands::list::get_results(repos),
     };
     match results {
-        Ok(res) => {
-            show_results(res, use_json)
-        }
-        Err(err) => {
-            show_error(err, use_json)
-        }
+        Ok(res) => show_results(res, use_json),
+        Err(err) => show_error(err, use_json),
     }
 }
 

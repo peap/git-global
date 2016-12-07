@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::env;
 use std::fmt;
 
-use git2::{Config};
+use git2::Config;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
 const SETTING_BASEDIR: &'static str = "global.basedir";
@@ -18,7 +18,9 @@ pub struct Repo {
 
 impl Repo {
     pub fn new(path: String) -> Repo {
-        Repo { path: path }
+        Repo {
+            path: path,
+        }
     }
 
     pub fn path(&self) -> String {
@@ -43,13 +45,15 @@ impl GitGlobalResult {
         for repo in repos {
             data.insert(repo.clone(), Vec::new());
         }
-        GitGlobalResult { data: data }
+        GitGlobalResult {
+            data: data,
+        }
     }
 
     pub fn append(&mut self, repo: &Repo, data_line: String) {
         match self.data.get_mut(&repo) {
             Some(item) => item.push(data_line),
-            None => ()
+            None => (),
         }
     }
 
@@ -68,12 +72,15 @@ impl GitGlobalResult {
             "results" => array![]
         };
         for (repo, data) in self.data.iter() {
-            json["results"].push(object!{
-                "path" => repo.path(),
-                "data" => array![]
-            }).expect("Failed pushing data to JSON results array.");
+            json["results"]
+                .push(object!{
+                    "path" => repo.path(),
+                    "data" => array![]
+                })
+                .expect("Failed pushing data to JSON results array.");
             for line in data {
-                json["results"]["data"].push(line.to_string())
+                json["results"]["data"]
+                    .push(line.to_string())
                     .expect("Failed pushing data line to JSON data array.");
             }
         }
@@ -90,18 +97,20 @@ struct GitGlobalConfig {
 impl GitGlobalConfig {
     fn new() -> GitGlobalConfig {
         let home_dir = env::home_dir()
-                           .expect("Could not determine home directory!")
-                           .to_str().unwrap().to_string();
+            .expect("Could not determine home directory!")
+            .to_str()
+            .unwrap()
+            .to_string();
         let (basedir, patterns) = match Config::open_default() {
-            Ok(config) => (
-                    config.get_string(SETTING_BASEDIR).unwrap_or(home_dir),
-                    config.get_string(SETTING_IGNORED).unwrap_or(String::new())
-                        .split(",").map(|p| p.trim().to_string()).collect(),
-            ),
-            Err(_) => (
-                home_dir,
-                Vec::new(),
-            ),
+            Ok(config) => {
+                (config.get_string(SETTING_BASEDIR).unwrap_or(home_dir),
+                 config.get_string(SETTING_IGNORED)
+                     .unwrap_or(String::new())
+                     .split(",")
+                     .map(|p| p.trim().to_string())
+                     .collect())
+            }
+            Err(_) => (home_dir, Vec::new()),
         };
         GitGlobalConfig {
             basedir: basedir,
@@ -122,7 +131,7 @@ pub fn get_repos() -> Vec<Repo> {
     let mut repos = Vec::new();
     let user_config = GitGlobalConfig::new();
     let walker = WalkDir::new(&user_config.basedir).into_iter();
-    for entry in walker.filter_entry(|e| user_config.filter(e) ) {
+    for entry in walker.filter_entry(|e| user_config.filter(e)) {
         match entry {
             Ok(entry) => {
                 if entry.file_type().is_dir() && entry.file_name() == ".git" {
@@ -131,7 +140,7 @@ pub fn get_repos() -> Vec<Repo> {
                         Some(path) => {
                             repos.push(Repo::new(path.to_string()));
                         }
-                        None => ()
+                        None => (),
                     }
                 }
             }

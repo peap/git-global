@@ -1,0 +1,5 @@
+max_width = 80
+ideal_width = 80
+item_brace_style = "PreferSameLine"
+struct_lit_multiline_style = "ForceMulti"
+format_strings = false
