@@ -8,7 +8,7 @@ use super::{GitGlobalError, GitGlobalResult, get_repos, subcommands};
 
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
-        .version("0.1.0")
+        .version(crate_version!())
         .author("Eric Petersen <eric@huskers.unl.edu>")
         .about("")
         .arg(

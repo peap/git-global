@@ -1,5 +1,6 @@
 //! git-global: git subcommand for working with all git repos on a machine
 
+#[macro_use]
 extern crate clap;
 extern crate git2;
 #[macro_use]

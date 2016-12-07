@@ -9,15 +9,8 @@ Use `git global <subcommand>` to:
 
 * `git global [list]`: show all the git repos on your machine (the default
   subcommand)
+* `git global scan`: search for git repos and update cache
 * `git global status`: show `git status` for all your git repos
-* `git global unstaged`: show all repos that have unstaged changes
-* `git global staged`: show all repos that have staged changes
-* `git global stashed`: show all repos that have stashed changes
-* `git global dirty`: show all repos that have changes of any kind
-* `git global branched`: show all repos not on `master` (TODO: or a different
-  default branch that is defined... somewhere?)
-* `git global duplicates`: show repos that are checked out to multiple places
-* `git global remotes`: show all remotes (TODO: why? maybe filter by hostname?)
 
 Configuration
 -------------
@@ -39,9 +32,23 @@ git config --global global.ignore .cargo,.vim
 Ideas
 -----
 
-* `git global scan`: search for git repos and update cache
+* `git global unstaged`: show all repos that have unstaged changes
+* `git global staged`: show all repos that have staged changes
+* `git global stashed`: show all repos that have stashed changes
+* `git global dirty`: show all repos that have changes of any kind
+* `git global branched`: show all repos not on `master` (TODO: or a different
+  default branch that is defined... somewhere?)
+* `git global duplicates`: show repos that are checked out to multiple places
+* `git global remotes`: show all remotes (TODO: why? maybe filter by hostname?)
+
 * `git global add <path>`: add a git repo to the list that would not be found in a scan
 * `git global ignore <path>`: ignore a git repo and remove it from the list
 * `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
+
+Release Notes
+-------------
+
+* 0.1.0 (work-in-progress)
+ * initial release with the `list`, `scan`, and `status` subcommands
