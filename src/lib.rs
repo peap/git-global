@@ -11,7 +11,7 @@ extern crate xdg;
 mod cli;
 mod core;
 mod errors;
-mod subcommands;
+pub mod subcommands;  // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
 pub use core::{GitGlobalResult, Repo, get_repos};
