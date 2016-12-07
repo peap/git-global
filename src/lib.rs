@@ -2,11 +2,10 @@
 
 extern crate clap;
 extern crate git2;
-
 #[macro_use]
 extern crate json;
-
 extern crate walkdir;
+extern crate xdg;
 
 mod cli;
 mod core;
