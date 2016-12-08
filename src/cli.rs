@@ -4,7 +4,9 @@ use std::io::{Write, stderr};
 
 use clap::{Arg, App, SubCommand};
 
-use super::{GitGlobalError, GitGlobalResult, get_repos, subcommands};
+use core::GitGlobalResult;
+use errors::GitGlobalError;
+use subcommands;
 
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
@@ -16,6 +18,8 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
             .help("Output results in JSON."))
         .subcommand(SubCommand::with_name("list")
             .about("lists all git repos on your machine [the default]"))
+        .subcommand(SubCommand::with_name("scan")
+            .about("update cache of git repos on your machine"))
         .subcommand(SubCommand::with_name("status")
             .about("shows status of all git repos"))
 }
@@ -25,12 +29,12 @@ pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
     let use_json = matches.is_present("json");
-    let repos = get_repos();
     let results = match matches.subcommand_name() {
-        Some("list") => subcommands::list::get_results(repos),
-        Some("status") => subcommands::status::get_results(repos),
+        Some("list") => subcommands::list::get_results(),
+        Some("scan") => subcommands::scan::get_results(),
+        Some("status") => subcommands::status::get_results(),
         Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::list::get_results(repos),
+        None => subcommands::list::get_results(),
     };
     match results {
         Ok(res) => show_results(res, use_json),

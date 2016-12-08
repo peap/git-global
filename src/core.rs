@@ -3,10 +3,15 @@
 use std::collections::HashMap;
 use std::env;
 use std::fmt;
+use std::fs::File;
+use std::io::{BufRead, BufReader, Write};
 
 use git2::Config;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
+use xdg;
 
+const CACHE_FILE: &'static str = "repos.txt";
+const CACHE_PREFIX: &'static str = "git-global";
 const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
 
@@ -36,6 +41,7 @@ impl fmt::Display for Repo {
 
 /// The result of a `git-global` subcommand.
 pub struct GitGlobalResult {
+    repos: Vec<Repo>,
     data: HashMap<Repo, Vec<String>>,
 }
 
@@ -46,6 +52,7 @@ impl GitGlobalResult {
             data.insert(repo.clone(), Vec::new());
         }
         GitGlobalResult {
+            repos: repos.clone(),
             data: data,
         }
     }
@@ -58,7 +65,8 @@ impl GitGlobalResult {
     }
 
     pub fn print(&self) {
-        for (repo, data) in self.data.iter() {
+        for repo in self.repos.iter() {
+            let data = self.data.get(&repo).unwrap();
             println!("{}", repo);
             for line in data {
                 println!("{}", line);
@@ -92,6 +100,7 @@ impl GitGlobalResult {
 struct GitGlobalConfig {
     basedir: String,
     ignored_patterns: Vec<String>,
+    cache_dir: xdg::BaseDirectories,
 }
 
 impl GitGlobalConfig {
@@ -112,9 +121,14 @@ impl GitGlobalConfig {
             }
             Err(_) => (home_dir, Vec::new()),
         };
+        let cache_dir = match xdg::BaseDirectories::with_prefix(CACHE_PREFIX) {
+            Ok(dir) => dir,
+            Err(_) => panic!("TODO: work without XDG"),
+        };
         GitGlobalConfig {
             basedir: basedir,
             ignored_patterns: patterns,
+            cache_dir: cache_dir,
         }
     }
 
@@ -122,15 +136,59 @@ impl GitGlobalConfig {
         self.ignored_patterns.iter().fold(true, |acc, pattern| {
             acc && !entry.path().to_str().unwrap().contains(pattern)
         })
-        // !(e.path().to_str().unwrap().contains(".cargo"))
+    }
+
+    fn has_cache(&self) -> bool {
+        match self.cache_dir.find_cache_file(CACHE_FILE) {
+            Some(path_buf) => path_buf.as_path().exists(),
+            None => false,
+        }
+    }
+
+    fn cache_repos(&self, repos: &Vec<Repo>) {
+        match self.cache_dir.place_cache_file(CACHE_FILE) {
+            Ok(path_buf) => {
+                let mut f = File::create(path_buf).unwrap();
+                for repo in repos.iter() {
+                    match writeln!(f, "{}", repo.path()) {
+                        Ok(_) => (),
+                        Err(e) => panic!("Problem writing cache file: {}", e),
+                    }
+                }
+            }
+            Err(e) => panic!("Unable to cache repos: {}", e),
+        }
+    }
+
+    fn get_cached_repos(&self) -> Vec<Repo> {
+        let mut repos = Vec::new();
+        match self.cache_dir.find_cache_file(CACHE_FILE) {
+            Some(path_buf) => {
+                if path_buf.as_path().exists() {
+                    let f = File::open(path_buf).unwrap();
+                    let reader = BufReader::new(f);
+                    for line in reader.lines() {
+                        match line {
+                            Ok(repo_path) => repos.push(Repo::new(repo_path)),
+                            Err(_) => (),  // TODO: handle errors
+                        }
+                    }
+                }
+            }
+            None => (),  // TODO: handle errors
+        }
+        repos
     }
 }
 
-/// Scan the machine for git repos.
-pub fn get_repos() -> Vec<Repo> {
+/// Scans the machine for git repos, taking git-global config into account.
+pub fn find_repos() -> Vec<Repo> {
     let mut repos = Vec::new();
     let user_config = GitGlobalConfig::new();
-    let walker = WalkDir::new(&user_config.basedir).into_iter();
+    let basedir = &user_config.basedir;
+    let walker = WalkDir::new(basedir).into_iter();
+    println!("Scanning for git repos under {}; this may take a while...",
+             basedir);
     for entry in walker.filter_entry(|e| user_config.filter(e)) {
         match entry {
             Ok(entry) => {
@@ -147,5 +205,24 @@ pub fn get_repos() -> Vec<Repo> {
             Err(_) => (),
         }
     }
+    repos.sort_by(|a, b| a.path().cmp(&b.path()));
     repos
+}
+
+/// Caches repo paths to disk, in the XDG cache directory for "git-global".
+pub fn cache_repos(repos: &Vec<Repo>) {
+    let user_config = GitGlobalConfig::new();
+    user_config.cache_repos(repos);
+}
+
+/// Loads cached repo paths from disk.
+pub fn get_repos() -> Vec<Repo> {
+    let user_config = GitGlobalConfig::new();
+    if !user_config.has_cache() {
+        let repos = find_repos();
+        cache_repos(&repos);
+        repos
+    } else {
+        user_config.get_cached_repos()
+    }
 }
