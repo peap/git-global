@@ -25,7 +25,7 @@ git config --global global.basedir /some/path
 
 To add patterns to exclude while walking directories:
 ```
-git config --global global.ignore .cargo,.vim
+git config --global global.ignore .cargo,.vim,Library
 ```
 
 
@@ -46,6 +46,9 @@ Ideas
 * `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
+
+* stream results as the come in (from `git global status`, for example, so we don't
+  have to wait until they're all collected)
 
 Release Notes
 -------------

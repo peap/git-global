@@ -59,7 +59,7 @@ fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
             "error" => true,
             "message" => format!("{}", error)
         };
-        writeln!(&mut stderr(), "{:#}", json).expect("failed write to STDERR");;
+        writeln!(&mut stderr(), "{:#}", json).expect("failed write to STDERR");
     } else {
         writeln!(&mut stderr(), "{}", error).expect("failed write to STDERR");
     }
