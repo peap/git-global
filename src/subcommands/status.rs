@@ -1,10 +1,12 @@
 //! The `status` subcommand, which shows `git status -s` for all known repos.
 
 use std::io::{Write, stderr};
+use std::sync::{Arc, mpsc};
+use std::thread;
 
 use git2;
 
-use core::{GitGlobalResult, get_repos};
+use core::{GitGlobalResult, Repo, get_repos};
 use errors::Result;
 
 fn get_short_format_status(path: &str, status: git2::Status) -> String {
@@ -35,31 +37,52 @@ fn get_short_format_status(path: &str, status: git2::Status) -> String {
     format!("{}{} {}", istatus, wstatus, path)
 }
 
+fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
+    let git2_repo = match repo.as_git2_repo() {
+        None => {
+            writeln!(&mut stderr(),
+                "Could not open {} as a git repo. Perhaps you should run \
+                `git global scan` again.", repo
+            ).expect("failed to write to STDERR");
+            return vec![];
+        }
+        Some(repo) => repo,
+    };
+    let mut opts = git2::StatusOptions::new();
+    opts.show(git2::StatusShow::IndexAndWorkdir)
+        .include_ignored(false);
+    let statuses = git2_repo.statuses(Some(&mut opts))
+        .expect(&format!("Could not get statuses for {}.", repo));
+    statuses.iter().map(|entry| {
+        let path = entry.path().unwrap();
+        let status = entry.status();
+        let status_for_path = get_short_format_status(path, status);
+        // result.add_repo_message(repo, format!("{}", status_for_path));
+        format!("{}", status_for_path)
+    }).collect()
+}
+
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = get_repos();
+    let n_repos = repos.len();
     let mut result = GitGlobalResult::new(&repos);
     result.pad_repo_output();
-    for repo in repos.iter() {
-        let git2_repo = match repo.as_git2_repo() {
-            None => {
-                writeln!(&mut stderr(),
-                    "Could not open {} as a git repo. Perhaps you should run \
-                    `git global scan` again.", repo
-                ).expect("failed to write to STDERR");
-                continue;
-            }
-            Some(repo) => repo,
-        };
-        let mut opts = git2::StatusOptions::new();
-        opts.show(git2::StatusShow::IndexAndWorkdir)
-            .include_ignored(false);
-        let statuses = git2_repo.statuses(Some(&mut opts))
-            .expect(&format!("Could not get statuses for {}.", repo));
-        for entry in statuses.iter() {
-            let path = entry.path().unwrap();
-            let status = entry.status();
-            let status_for_path = get_short_format_status(path, status);
-            result.add_repo_message(repo, format!("{}", status_for_path));
+    // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
+    let (tx, rx) = mpsc::channel();
+    for repo in repos {
+        let tx = tx.clone();
+        let repo = Arc::new(repo);
+        thread::spawn(move || {
+            let path = repo.path();
+            let lines = get_status_lines(repo);
+            tx.send((path, lines)).unwrap();
+        });
+    }
+    for _ in 0..n_repos {
+        let (path, lines) = rx.recv().unwrap();
+        let repo = Repo::new(path.to_string());
+        for line in lines {
+            result.add_repo_message(&repo, line);
         }
     }
     Ok(result)
