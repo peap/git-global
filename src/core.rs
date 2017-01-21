@@ -5,13 +5,14 @@ use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
+use std::path::PathBuf;
 
+use app_dirs::{AppInfo, AppDataType, app_dir, get_app_dir};
 use git2;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
-use xdg;
 
+const APP: AppInfo = AppInfo { name: "git-global", author: "peap" };
 const CACHE_FILE: &'static str = "repos.txt";
-const CACHE_PREFIX: &'static str = "git-global";
 const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
 
@@ -127,15 +128,15 @@ impl GitGlobalResult {
 struct GitGlobalConfig {
     basedir: String,
     ignored_patterns: Vec<String>,
-    cache_dir: xdg::BaseDirectories,
+    cache_file: PathBuf,
 }
 
 impl GitGlobalConfig {
     fn new() -> GitGlobalConfig {
         let home_dir = env::home_dir()
-            .expect("Could not determine home directory!")
+            .expect("Could not determine home directory.")
             .to_str()
-            .unwrap()
+            .expect("Could not convert home directory path to string.")
             .to_string();
         let (basedir, patterns) = match git2::Config::open_default() {
             Ok(config) => {
@@ -148,14 +149,17 @@ impl GitGlobalConfig {
             }
             Err(_) => (home_dir, Vec::new()),
         };
-        let cache_dir = match xdg::BaseDirectories::with_prefix(CACHE_PREFIX) {
-            Ok(dir) => dir,
+        let cache_file = match get_app_dir(AppDataType::UserCache, &APP, "cache") {
+            Ok(mut dir) => {
+                dir.push(CACHE_FILE);
+                dir
+            }
             Err(_) => panic!("TODO: work without XDG"),
         };
         GitGlobalConfig {
             basedir: basedir,
             ignored_patterns: patterns,
-            cache_dir: cache_dir,
+            cache_file: cache_file,
         }
     }
 
@@ -167,43 +171,38 @@ impl GitGlobalConfig {
     }
 
     fn has_cache(&self) -> bool {
-        match self.cache_dir.find_cache_file(CACHE_FILE) {
-            Some(path_buf) => path_buf.as_path().exists(),
-            None => false,
-        }
+        self.cache_file.as_path().exists()
     }
 
     fn cache_repos(&self, repos: &Vec<Repo>) {
-        match self.cache_dir.place_cache_file(CACHE_FILE) {
-            Ok(path_buf) => {
-                let mut f = File::create(path_buf).unwrap();
-                for repo in repos.iter() {
-                    match writeln!(f, "{}", repo.path()) {
-                        Ok(_) => (),
-                        Err(e) => panic!("Problem writing cache file: {}", e),
-                    }
-                }
+        if !self.cache_file.as_path().exists() {
+            // Try to create the cache directory if the cache *file* doesn't exist; app_dir()
+            // handles an existing directory just fine.
+            match app_dir(AppDataType::UserCache, &APP, "cache") {
+                Ok(_) => (),
+                Err(e) => panic!("Could not create cache directory: {}", e),
             }
-            Err(e) => panic!("Unable to cache repos: {}", e),
+        }
+        let mut f = File::create(&self.cache_file).expect("Could not create cache file.");
+        for repo in repos.iter() {
+            match writeln!(f, "{}", repo.path()) {
+                Ok(_) => (),
+                Err(e) => panic!("Problem writing cache file: {}", e),
+            }
         }
     }
 
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
-        match self.cache_dir.find_cache_file(CACHE_FILE) {
-            Some(path_buf) => {
-                if path_buf.as_path().exists() {
-                    let f = File::open(path_buf).unwrap();
-                    let reader = BufReader::new(f);
-                    for line in reader.lines() {
-                        match line {
-                            Ok(repo_path) => repos.push(Repo::new(repo_path)),
-                            Err(_) => (),  // TODO: handle errors
-                        }
-                    }
+        if self.cache_file.as_path().exists() {
+            let f = File::open(&self.cache_file).expect("Could not open cache file.");
+            let reader = BufReader::new(f);
+            for line in reader.lines() {
+                match line {
+                    Ok(repo_path) => repos.push(Repo::new(repo_path)),
+                    Err(_) => (),  // TODO: handle errors
                 }
             }
-            None => (),  // TODO: handle errors
         }
         repos
     }
@@ -221,7 +220,7 @@ pub fn find_repos() -> Vec<Repo> {
         match entry {
             Ok(entry) => {
                 if entry.file_type().is_dir() && entry.file_name() == ".git" {
-                    let parent_path = entry.path().parent().unwrap();
+                    let parent_path = entry.path().parent().expect("Could not determine parent.");
                     match parent_path.to_str() {
                         Some(path) => {
                             repos.push(Repo::new(path.to_string()));
