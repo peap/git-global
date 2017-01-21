@@ -16,6 +16,8 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         .arg(Arg::with_name("json")
             .long("json")
             .help("Output results in JSON."))
+        .subcommand(SubCommand::with_name("info")
+            .about("show meta-information about git-global"))
         .subcommand(SubCommand::with_name("list")
             .about("lists all git repos on your machine [the default]"))
         .subcommand(SubCommand::with_name("scan")
@@ -30,6 +32,7 @@ pub fn run_from_command_line() -> i32 {
     let matches = clap_app.get_matches();
     let use_json = matches.is_present("json");
     let results = match matches.subcommand_name() {
+        Some("info") => subcommands::info::get_results(),
         Some("list") => subcommands::list::get_results(),
         Some("scan") => subcommands::scan::get_results(),
         Some("status") => subcommands::status::get_results(),

@@ -125,14 +125,14 @@ impl GitGlobalResult {
 }
 
 /// Container for `git-global` configuration options.
-struct GitGlobalConfig {
-    basedir: String,
-    ignored_patterns: Vec<String>,
-    cache_file: PathBuf,
+pub struct GitGlobalConfig {
+    pub basedir: String,
+    pub ignored_patterns: Vec<String>,
+    pub cache_file: PathBuf,
 }
 
 impl GitGlobalConfig {
-    fn new() -> GitGlobalConfig {
+    pub fn new() -> GitGlobalConfig {
         let home_dir = env::home_dir()
             .expect("Could not determine home directory.")
             .to_str()

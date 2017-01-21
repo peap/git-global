@@ -1,16 +1,19 @@
 git-global
 ==========
 
-Use `git-global` to keep track of all your local git repositories. Put it
-on your `PATH` with `cargo install git-global`, and you gain an extra
-git subcommand that you can run from anywhere.
+Use `git-global` to keep track of all your local git repositories. This is a
+Rust program that you can put on your `PATH` with `cargo install git-global`,
+gaining an extra git subcommand that you can run from anywhere. To obtain cargo
+and Rust, see https://rustup.rs.
 
 Use `git global <subcommand>` to:
 
-* `git global [list]`: show all the git repos on your machine (the default
-  subcommand)
+* `git global [list]`: show all the git repos under your home directory (the
+  default subcommand)
 * `git global scan`: search for git repos and update cache
 * `git global status`: show `git status` for all your git repos
+* `git global info`: show information about git-global itself (configuration,
+  number of repos, etc.)
 
 Configuration
 -------------
