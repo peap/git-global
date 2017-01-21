@@ -105,7 +105,8 @@ impl GitGlobalResult {
             "repo_messages" => object!{}
         };
         for msg in self.messages.iter() {
-            json["results"]["messages"].push(msg.to_string())
+            json["results"]["messages"]
+                .push(msg.to_string())
                 .expect("Failing pushing message to JSON messages array.");
         }
         for (repo, messages) in self.repo_messages.iter() {
@@ -160,9 +161,9 @@ impl GitGlobalConfig {
 
     fn filter(&self, entry: &DirEntry) -> bool {
         let entry_path = entry.path().to_str().expect("DirEntry without path.");
-        self.ignored_patterns.iter().fold(true, |acc, pattern| {
-            acc && !entry_path.contains(pattern)
-        })
+        self.ignored_patterns
+            .iter()
+            .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
     }
 
     fn has_cache(&self) -> bool {

@@ -21,7 +21,10 @@ fn get_short_format_status(path: &str, status: git2::Status) -> String {
     };
     let mut wstatus = match status {
         s if s.contains(git2::STATUS_WT_NEW) => {
-            if istatus == ' ' { istatus = '?'; } '?'
+            if istatus == ' ' {
+                istatus = '?';
+            }
+            '?'
         }
         s if s.contains(git2::STATUS_WT_MODIFIED) => 'M',
         s if s.contains(git2::STATUS_WT_DELETED) => 'D',
@@ -41,9 +44,10 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     let git2_repo = match repo.as_git2_repo() {
         None => {
             writeln!(&mut stderr(),
-                "Could not open {} as a git repo. Perhaps you should run \
-                `git global scan` again.", repo
-            ).expect("failed to write to STDERR");
+                     "Could not open {} as a git repo. Perhaps you should run \
+                `git global scan` again.",
+                     repo)
+                .expect("failed to write to STDERR");
             return vec![];
         }
         Some(repo) => repo,
@@ -53,13 +57,15 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
         .include_ignored(false);
     let statuses = git2_repo.statuses(Some(&mut opts))
         .expect(&format!("Could not get statuses for {}.", repo));
-    statuses.iter().map(|entry| {
-        let path = entry.path().unwrap();
-        let status = entry.status();
-        let status_for_path = get_short_format_status(path, status);
-        // result.add_repo_message(repo, format!("{}", status_for_path));
-        format!("{}", status_for_path)
-    }).collect()
+    statuses.iter()
+        .map(|entry| {
+            let path = entry.path().unwrap();
+            let status = entry.status();
+            let status_for_path = get_short_format_status(path, status);
+            // result.add_repo_message(repo, format!("{}", status_for_path));
+            format!("{}", status_for_path)
+        })
+        .collect()
 }
 
 pub fn get_results() -> Result<GitGlobalResult> {
