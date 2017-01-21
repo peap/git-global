@@ -49,6 +49,9 @@ Ideas
 
 * stream results as the come in (from `git global status`, for example, so we don't
   have to wait until they're all collected)
+* use `locate .git` if the DB is populated, instead of walking everything
+* make a `Subcommand` trait
+* do concurrency generically, not just for status subcommand
 
 Release Notes
 -------------
