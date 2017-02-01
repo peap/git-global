@@ -1,22 +1,21 @@
-git-global
-==========
+# git-global
 
-Use `git-global` to keep track of all your local git repositories. This is a
-Rust program that you can put on your `PATH` with `cargo install git-global`,
-gaining an extra git subcommand that you can run from anywhere. To obtain cargo
-and Rust, see https://rustup.rs.
+Use `git-global` to keep track of all your local git repositories.
+
+This is a Rust program that you can put on your `PATH` with `cargo install
+git-global`, gaining an extra git subcommand that you can run from anywhere. To
+obtain cargo and Rust, see https://rustup.rs.
 
 Use `git global <subcommand>` to:
 
-* `git global [list]`: show all the git repos under your home directory (the
-  default subcommand)
-* `git global scan`: search for git repos and update cache
-* `git global status`: show `git status` for all your git repos
+* `git global [status]`: show `git status` for all your git repos (the default
+  subcommand)
 * `git global info`: show information about git-global itself (configuration,
-  number of repos, etc.)
+  number of known repos, etc.)
+* `git global list`: show all git repos git-global knows about
+* `git global scan`: search for git repos and update cache
 
-Configuration
--------------
+## Configuration
 
 To change the behavior of `git-global`, you can do so with --- wait for it
 --- git global configuration!
@@ -31,9 +30,7 @@ To add patterns to exclude while walking directories:
 git config --global global.ignore .cargo,.vim,Library
 ```
 
-
-Ideas
------
+## Ideas
 
 * `git global unstaged`: show all repos that have unstaged changes
 * `git global staged`: show all repos that have staged changes
@@ -56,8 +53,7 @@ Ideas
 * make a `Subcommand` trait
 * do concurrency generically, not just for status subcommand
 
-Release Notes
--------------
+## Release Notes
 
 * 0.1.0 (work-in-progress)
- * initial release with the `list`, `scan`, and `status` subcommands
+ * initial release with the following subcommands: help, info, list, scan, status

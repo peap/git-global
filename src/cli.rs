@@ -37,7 +37,7 @@ pub fn run_from_command_line() -> i32 {
         Some("scan") => subcommands::scan::get_results(),
         Some("status") => subcommands::status::get_results(),
         Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::list::get_results(),
+        None => subcommands::scan::get_results(),
     };
     match results {
         Ok(res) => show_results(res, use_json),
