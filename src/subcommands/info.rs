@@ -28,8 +28,14 @@ pub fn get_results() -> Result<GitGlobalResult> {
     let repos = get_repos();
     let mut result = GitGlobalResult::new(&repos);
     let config = GitGlobalConfig::new();
-    result.add_message(format!("git-global {}", crate_version!()));
-    result.add_message(format!("=================="));
+    let version = format!("{}", crate_version!());
+    // beginning of underline:   git-global x.x.x
+    let mut underline = format!("===========");
+    for _ in 0..version.len() {
+        underline.push('=');
+    }
+    result.add_message(format!("git-global {}", version));
+    result.add_message(underline);
     result.add_message(format!("Number of repos: {}", repos.len()));
     result.add_message(format!("Base directory: {}", config.basedir));
     result.add_message(format!("Cache file: {}", config.cache_file.to_str().unwrap()));
