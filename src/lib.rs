@@ -1,6 +1,7 @@
 //! git-global: git subcommand for working with all git repos on a machine
 
 extern crate app_dirs;
+extern crate chrono;
 #[macro_use]
 extern crate clap;
 extern crate git2;
