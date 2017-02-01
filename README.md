@@ -1,5 +1,8 @@
 # git-global
 
+[![Crates.io](https://img.shields.io/crates/v/git-global.svg)](https://crates.io/crates/git-global)
+[![Crates.io](https://img.shields.io/crates/d/git-global.svg)](https://crates.io/crates/git-global)
+
 Use `git-global` to keep track of all your local git repositories.
 
 This is a Rust program that you can put on your `PATH` with `cargo install
@@ -55,5 +58,7 @@ git config --global global.ignore .cargo,.vim,Library
 
 ## Release Notes
 
-* 0.1.0 (work-in-progress)
+* 0.1.1 (work-in-progress)
+ * ...
+* 0.1.0 (1/31/17)
  * initial release with the following subcommands: help, info, list, scan, status

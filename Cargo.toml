@@ -1,9 +1,10 @@
 [package]
 name = "git-global"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
 description = "Keep track of all your local git repositories. "
 
+homepage = "https://github.com/peap/git-global"
 repository = "https://github.com/peap/git-global"
 license = "MIT"
 readme = "README.md"
