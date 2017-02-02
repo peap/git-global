@@ -40,12 +40,12 @@ git config --global global.ignore .cargo,.vim,Library
 * `git global stashed`: show all repos that have stashed changes
 * `git global dirty`: show all repos that have changes of any kind
 * `git global branched`: show all repos not on `master` (TODO: or a different
-  default branch that is defined... somewhere?)
+  default branch in .gitconfig)
 * `git global duplicates`: show repos that are checked out to multiple places
 * `git global remotes`: show all remotes (TODO: why? maybe filter by hostname?)
 
-* `git global add <path>`: add a git repo to the list that would not be found in a scan
-* `git global ignore <path>`: ignore a git repo and remove it from the list
+* `git global add <path>`: add a git repo to the cache that would not be found in a scan
+* `git global ignore <path>`: ignore a git repo and remove it from the cache
 * `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
@@ -60,6 +60,7 @@ git config --global global.ignore .cargo,.vim,Library
 ## Release Notes
 
 * 0.1.1 (work-in-progress)
- * ...
+ * add tests
+ * expanded documentation and package metadata
 * 0.1.0 (1/31/17)
  * initial release with the following subcommands: help, info, list, scan, status

@@ -253,3 +253,23 @@ pub fn get_repos() -> Vec<Repo> {
         user_config.get_cached_repos()
     }
 }
+
+/// Tests!
+#[cfg(test)]
+mod tests {
+    use git2;
+    use tempdir::TempDir;
+    use core::Repo;
+
+    #[test]
+    fn test_repo_initialization() {
+        let td = TempDir::new("test").unwrap();
+        let path = td.path();
+        git2::Repository::init(path).unwrap();
+        let repo = Repo::new(path.to_str().unwrap().to_string());
+        let git2_repo = repo.as_git2_repo().unwrap();
+        assert!(!git2_repo.is_bare());
+        assert_eq!(repo.path(), path.to_str().unwrap());
+    }
+
+}

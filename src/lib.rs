@@ -22,6 +22,9 @@ extern crate git2;
 extern crate json;
 extern crate walkdir;
 
+#[cfg(test)]
+extern crate tempdir;
+
 mod cli;
 mod core;
 mod errors;
