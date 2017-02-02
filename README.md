@@ -55,6 +55,7 @@ git config --global global.ignore .cargo,.vim,Library
 * use `locate .git` if the DB is populated, instead of walking everything
 * make a `Subcommand` trait
 * do concurrency generically, not just for status subcommand
+* rename `GitGlobalResult` so it's not confused with a normal `Result`
 
 ## Release Notes
 

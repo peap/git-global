@@ -1,9 +1,19 @@
-//! The `scan` subcommand, which scans the user's home directory for git repos
-//! and caches the list of paths it finds.
+//! The `scan` subcommand: scans the filesystem for git repos.
+//!
+//! By default, the user's home directory is walked, but this starting point can
+//! be configured in `~/.gitconfig`:
+//!
+//! ```bash
+//! $ git config --global global.basedir /some/path
+//! ```
+//!
+//! The `scan` subcommand caches the list of paths to git repos it finds, and
+//! can be rerun at any time to refresh the list.
 
 use core::{GitGlobalResult, cache_repos, find_repos};
 use errors::Result;
 
+/// Caches the results of `find_repos()` and shows how many were found.
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = find_repos();
     cache_repos(&repos);

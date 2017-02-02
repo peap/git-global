@@ -1,4 +1,5 @@
 [package]
+
 name = "git-global"
 version = "0.1.1"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
@@ -6,11 +7,13 @@ description = "Keep track of all your local git repositories. "
 
 homepage = "https://github.com/peap/git-global"
 repository = "https://github.com/peap/git-global"
+documentation = "https://docs.rs/git-global"
+
 license = "MIT"
 readme = "README.md"
 
 keywords = ["git"]
-# categories = ["command-line-utilities", "development-tools"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "git-global"

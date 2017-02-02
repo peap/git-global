@@ -1,4 +1,4 @@
-//! The `status` subcommand, which shows `git status -s` for all known repos.
+//! The `status` subcommand: shows `git status -s` for all known repos.
 
 use std::io::{Write, stderr};
 use std::sync::{Arc, mpsc};
@@ -9,8 +9,10 @@ use git2;
 use core::{GitGlobalResult, Repo, get_repos};
 use errors::Result;
 
+/// Translates a file's status flags to their "short format" representation.
+///
+/// Follows an example in the git2-rs crate's `examples/status.rs`.
 fn get_short_format_status(path: &str, status: git2::Status) -> String {
-    // From git2's examples/status.rs...
     let mut istatus = match status {
         s if s.contains(git2::STATUS_INDEX_NEW) => 'A',
         s if s.contains(git2::STATUS_INDEX_MODIFIED) => 'M',
@@ -40,6 +42,7 @@ fn get_short_format_status(path: &str, status: git2::Status) -> String {
     format!("{}{} {}", istatus, wstatus, path)
 }
 
+/// Returns "short format" output for the given repo.
 fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     let git2_repo = match repo.as_git2_repo() {
         None => {
@@ -68,6 +71,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
         .collect()
 }
 
+/// Shows `git status -s` for all known repos.
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = get_repos();
     let n_repos = repos.len();

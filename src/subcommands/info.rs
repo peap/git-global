@@ -1,4 +1,4 @@
-//! The `info` subcommand, which shows meta-information about git-global.
+//! The `info` subcommand: shows metadata about the git-global installation.
 
 use chrono::Duration;
 
@@ -8,7 +8,7 @@ use std::time::SystemTime;
 use core::{GitGlobalConfig, GitGlobalResult, get_repos};
 use errors::Result;
 
-/// Get the age of the given file in terms of days, hours, minutes, and seconds.
+/// Returns the age of a file in terms of days, hours, minutes, and seconds.
 fn get_age(filename: PathBuf) -> Option<String> {
     filename.metadata().ok()
         .and_then(|metadata| metadata.modified().ok())
@@ -24,6 +24,7 @@ fn get_age(filename: PathBuf) -> Option<String> {
         })
 }
 
+/// Gathers metadata about the git-global installation.
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = get_repos();
     let mut result = GitGlobalResult::new(&repos);

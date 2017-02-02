@@ -1,4 +1,4 @@
-//! core: core functionality for the `git-global` command
+//! Core functionality for git-global.
 
 use std::collections::HashMap;
 use std::env;
@@ -16,7 +16,7 @@ const CACHE_FILE: &'static str = "repos.txt";
 const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
 
-/// A git repo.
+/// A git repository.
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Repo {
     path: String,
@@ -44,7 +44,7 @@ impl fmt::Display for Repo {
     }
 }
 
-/// The result of a `git-global` subcommand.
+/// The result of a git-global subcommand.
 pub struct GitGlobalResult {
     messages: Vec<String>,
     repos: Vec<Repo>,
@@ -124,7 +124,7 @@ impl GitGlobalResult {
     }
 }
 
-/// Container for `git-global` configuration options.
+/// A container for git-global configuration options.
 pub struct GitGlobalConfig {
     pub basedir: String,
     pub ignored_patterns: Vec<String>,
@@ -176,8 +176,8 @@ impl GitGlobalConfig {
 
     fn cache_repos(&self, repos: &Vec<Repo>) {
         if !self.cache_file.as_path().exists() {
-            // Try to create the cache directory if the cache *file* doesn't exist; app_dir()
-            // handles an existing directory just fine.
+            // Try to create the cache directory if the cache *file* doesn't
+            // exist; app_dir() handles an existing directory just fine.
             match app_dir(AppDataType::UserCache, &APP, "cache") {
                 Ok(_) => (),
                 Err(e) => panic!("Could not create cache directory: {}", e),
@@ -208,7 +208,7 @@ impl GitGlobalConfig {
     }
 }
 
-/// Scans the machine for git repos, taking git-global config into account.
+/// Scans filesystem for git repos, taking git-global configuration into account.
 pub fn find_repos() -> Vec<Repo> {
     let mut repos = Vec::new();
     let user_config = GitGlobalConfig::new();
@@ -236,13 +236,13 @@ pub fn find_repos() -> Vec<Repo> {
     repos
 }
 
-/// Caches repo paths to disk, in the XDG cache directory for "git-global".
+/// Caches repo paths to disk, in the XDG cache directory for git-global.
 pub fn cache_repos(repos: &Vec<Repo>) {
     let user_config = GitGlobalConfig::new();
     user_config.cache_repos(repos);
 }
 
-/// Loads cached repo paths from disk.
+/// Returns all known git repos, populating the cache first, if necessary.
 pub fn get_repos() -> Vec<Repo> {
     let user_config = GitGlobalConfig::new();
     if !user_config.has_cache() {

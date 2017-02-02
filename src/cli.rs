@@ -1,4 +1,4 @@
-//! cli: command line parsing for git-global
+//! The command line interface for git-global.
 
 use std::io::{Write, stderr};
 

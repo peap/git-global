@@ -1,17 +1,18 @@
-//! errors: errors for `git-global`
+//! Error handling for git-global.
 
 use std::error::Error;
 use std::fmt;
 use std::io;
 use std::result;
 
-/// An error!
+/// An error.
 #[derive(Debug)]
 pub enum GitGlobalError {
     BadSubcommand(String),
     Generic,
 }
 
+/// Our `Result` alias with `GitGlobalError` as the error type.
 pub type Result<T> = result::Result<T, GitGlobalError>;
 
 impl fmt::Display for GitGlobalError {
