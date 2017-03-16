@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/git-global.svg)](https://crates.io/crates/git-global)
 [![Crates.io](https://img.shields.io/crates/d/git-global.svg)](https://crates.io/crates/git-global)
 
-Use `git-global` to keep track of all your local git repositories.
+Use `git-global` to keep track of all your git repositories.
 
 This is a Rust program that you can put on your `PATH` with `cargo install
 git-global`, gaining an extra git subcommand that you can run from anywhere. To
@@ -16,7 +16,7 @@ Use `git global <subcommand>` to:
 * `git global info`: show information about git-global itself (configuration,
   number of known repos, etc.)
 * `git global list`: show all git repos git-global knows about
-* `git global scan`: search for git repos and update cache
+* `git global scan`: search your filesystem for git repos and update cache
 
 ## Configuration
 

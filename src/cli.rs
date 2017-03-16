@@ -11,7 +11,7 @@ use subcommands;
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
         .version(crate_version!())
-        .author("Eric Petersen <eric@huskers.unl.edu>")
+        .author("Eric Petersen <eric@ericpetersen.io>")
         .about("git subcommand for working with all git repos on a machine")
         .arg(Arg::with_name("json")
             .long("json")
