@@ -60,7 +60,7 @@ git config --global global.ignore .cargo,.vim,Library
 ## Release Notes
 
 * 0.1.1 (work-in-progress)
- * add tests
- * expanded documentation and package metadata
+  * add tests
+  * expanded documentation and package metadata
 * 0.1.0 (1/31/17)
- * initial release with the following subcommands: help, info, list, scan, status
+  * initial release with the following subcommands: help, info, list, scan, status
