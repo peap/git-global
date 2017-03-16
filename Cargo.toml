@@ -22,7 +22,7 @@ doc = false
 [dependencies]
 app_dirs = "1"
 clap = "2"
-chrono = "0.2"
+chrono = "0.3"
 json = "0.11"
 walkdir = "1"
 
