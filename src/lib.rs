@@ -1,16 +1,16 @@
-//! Keep track of all your local git repositories.
+//! Keep track of all your git repositories.
 //!
 //! This crate houses the binary and library for the git-global subcommand, a
-//! way to query statuses of all your local git repos. The binary can be
-//! installed with cargo: `cargo install git-global`.
+//! way to query statuses of all your git repos. The binary can be installed
+//! with cargo: `cargo install git-global`.
 //!
 //! # Usage
 //!
 //! ```bash
-//! $ git global [status]  # get the status of all known repos
-//! $ git global scan      # (re)scan home directory to discover git repos
-//! $ git global list      # list all known repos
-//! $ git global info      # show meta-information about git-global
+//! $ git global [status]  # show `git status` for all your git repos
+//! $ git global info      # show information about git-global itself
+//! $ git global list      # show all git repos git-global knows about
+//! $ git global scan      # search your filesystem for git repos and update cache
 //! ```
 
 extern crate app_dirs;
