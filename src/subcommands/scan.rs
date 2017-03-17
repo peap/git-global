@@ -7,13 +7,13 @@
 //! $ git config --global global.basedir /some/path
 //! ```
 //!
-//! The `scan` subcommand caches the list of paths to git repos it finds, and
-//! can be rerun at any time to refresh the list.
+//! The `scan` subcommand caches the list of git repos paths it finds, and can
+//! be rerun at any time to refresh the list.
 
 use core::{GitGlobalResult, cache_repos, find_repos};
 use errors::Result;
 
-/// Caches the results of `find_repos()` and shows how many were found.
+/// Caches the results of `find_repos()` and says how many were found.
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = find_repos();
     cache_repos(&repos);

@@ -1,4 +1,7 @@
-//! Core functionality for git-global.
+//! Core functionality of git-global.
+//!
+//! Includes the `Repo`, `GitGlobalConfig`, and `GitGlobalResult` structs, and
+//! the `get_repos()` function.
 
 use std::collections::HashMap;
 use std::env;
@@ -16,7 +19,7 @@ const CACHE_FILE: &'static str = "repos.txt";
 const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
 
-/// A git repository.
+/// A git repository, represented by the full path to its base directory.
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct Repo {
     path: String,
@@ -29,10 +32,12 @@ impl Repo {
         }
     }
 
+    /// Returns the full path to the repo as a `String`.
     pub fn path(&self) -> String {
         self.path.clone()
     }
 
+    /// Returns the `git2::Repository` equivalent of this repo.
     pub fn as_git2_repo(&self) -> Option<git2::Repository> {
         git2::Repository::open(&self.path).ok()
     }
@@ -45,6 +50,8 @@ impl fmt::Display for Repo {
 }
 
 /// The result of a git-global subcommand.
+///
+/// Contains overall messages, per-repo messages, and a list of repos.
 pub struct GitGlobalResult {
     messages: Vec<String>,
     repos: Vec<Repo>,
@@ -66,14 +73,20 @@ impl GitGlobalResult {
         }
     }
 
+    /// Declares desire to separate output when showing per-repo messages.
+    ///
+    /// Sets flag that indicates a blank line should be inserted between
+    /// messages for each repo when showing results output.
     pub fn pad_repo_output(&mut self) {
         self.flag_pad_repo_output = true;
     }
 
+    /// Adds a message that applies to the overall operation.
     pub fn add_message(&mut self, message: String) {
         self.messages.push(message);
     }
 
+    /// Adds a message that applies to a particular repo.
     pub fn add_repo_message(&mut self, repo: &Repo, data_line: String) {
         match self.repo_messages.get_mut(&repo) {
             Some(item) => item.push(data_line),
@@ -81,6 +94,7 @@ impl GitGlobalResult {
         }
     }
 
+    /// Writes all result messages to STDOUT, as text.
     pub fn print(&self) {
         for msg in self.messages.iter() {
             println!("{}", msg);
@@ -99,6 +113,7 @@ impl GitGlobalResult {
         }
     }
 
+    /// Writes all result messages to STDOUT, as JSON.
     pub fn print_json(&self) {
         let mut json = object!{
             "error" => false,
@@ -163,6 +178,7 @@ impl GitGlobalConfig {
         }
     }
 
+    /// Returns `true` if this directory entry should be included in scans.
     fn filter(&self, entry: &DirEntry) -> bool {
         let entry_path = entry.path().to_str().expect("DirEntry without path.");
         self.ignored_patterns
@@ -170,10 +186,12 @@ impl GitGlobalConfig {
             .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
     }
 
+    /// Returns boolean indicating if the cache file exists.
     fn has_cache(&self) -> bool {
         self.cache_file.as_path().exists()
     }
 
+    /// Writes the given repo paths to the cache file.
     fn cache_repos(&self, repos: &Vec<Repo>) {
         if !self.cache_file.as_path().exists() {
             // Try to create the cache directory if the cache *file* doesn't
@@ -192,6 +210,7 @@ impl GitGlobalConfig {
         }
     }
 
+    /// Returns the list of repos found in the cache file.
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
         if self.cache_file.as_path().exists() {
@@ -208,7 +227,7 @@ impl GitGlobalConfig {
     }
 }
 
-/// Scans filesystem for git repos, taking git-global configuration into account.
+/// Walks the configured base directory, looking for git repos.
 pub fn find_repos() -> Vec<Repo> {
     let mut repos = Vec::new();
     let user_config = GitGlobalConfig::new();
@@ -236,7 +255,7 @@ pub fn find_repos() -> Vec<Repo> {
     repos
 }
 
-/// Caches repo paths to disk, in the XDG cache directory for git-global.
+/// Caches repo list to disk, in the XDG cache directory for git-global.
 pub fn cache_repos(repos: &Vec<Repo>) {
     let user_config = GitGlobalConfig::new();
     user_config.cache_repos(repos);

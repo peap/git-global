@@ -11,8 +11,8 @@ obtain cargo and Rust, see https://rustup.rs.
 
 Use `git global <subcommand>` to:
 
-* `git global [status]`: show `git status` for all your git repos (the default
-  subcommand)
+* `git global [status]`: show `git status -s` for all your git repos (the
+  default subcommand)
 * `git global info`: show information about git-global itself (configuration,
   number of known repos, etc.)
 * `git global list`: show all git repos git-global knows about

@@ -71,7 +71,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
         .collect()
 }
 
-/// Shows `git status -s` for all known repos.
+/// Gathers `git status -s` for all known repos.
 pub fn get_results() -> Result<GitGlobalResult> {
     let repos = get_repos();
     let n_repos = repos.len();

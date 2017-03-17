@@ -8,6 +8,7 @@ use core::GitGlobalResult;
 use errors::GitGlobalError;
 use subcommands;
 
+/// Returns the definitive clap::App instance for git-global.
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
         .version(crate_version!())
@@ -26,7 +27,10 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
             .about("shows status of all git repos"))
 }
 
-/// Entry point for the `git-global` git subcommand. Returns an exit code.
+/// Runs the appropriate git-global subcommand based on command line arguments.
+///
+/// As the effective binary entry point for `git-global`, prints results to
+/// `STDOUT` and returns an exit code.
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
@@ -45,7 +49,7 @@ pub fn run_from_command_line() -> i32 {
     }
 }
 
-/// Print out the subcommand results.
+/// Writes results to STDOUT, as either text or JSON, and returns `0`.
 fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
     if use_json {
         results.print_json();
@@ -55,7 +59,7 @@ fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
     0
 }
 
-/// Print out an error.
+/// Writes errors to STDERR, as either text or JSON, and returns `1`.
 fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
     if use_json {
         let json = object!{
