@@ -5,8 +5,9 @@ use chrono::Duration;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use core::{GitGlobalConfig, GitGlobalResult, get_repos};
+use config::Config;
 use errors::Result;
+use subcommands::SubcommandReport;
 
 /// Returns the age of a file in terms of days, hours, minutes, and seconds.
 fn get_age(filename: PathBuf) -> Option<String> {
@@ -25,10 +26,9 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = get_repos();
-    let mut result = GitGlobalResult::new(&repos);
-    let config = GitGlobalConfig::new();
+pub fn run(config: &Config) -> Result<SubcommandReport> {
+    let repos = config.get_repos();
+    let mut result = SubcommandReport::new(&repos);
     let version = format!("{}", crate_version!());
     // beginning of underline:   git-global x.x.x
     let mut underline = format!("===========");
@@ -38,9 +38,13 @@ pub fn get_results() -> Result<GitGlobalResult> {
     result.add_message(format!("git-global {}", version));
     result.add_message(underline);
     result.add_message(format!("Number of repos: {}", repos.len()));
-    result.add_message(format!("Base directory: {}", config.basedir));
-    result.add_message(format!("Cache file: {}", config.cache_file.to_str().unwrap()));
-    if let Some(age) = get_age(config.cache_file) {
+    result.add_message(
+        format!("Scanning root dir: {}", config.scan_root.display())
+    );
+    result.add_message(
+        format!("Cache file: {}", config.get_cache_file().display())
+    );
+    if let Some(age) = get_age(config.get_cache_file()) {
         result.add_message(format!("Cache file age: {}", age));
     }
     result.add_message(format!("Ignored patterns:"));

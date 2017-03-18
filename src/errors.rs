@@ -5,8 +5,8 @@ use std::fmt;
 use std::io;
 use std::result;
 
-/// An error.
 #[derive(Debug)]
+/// An error.
 pub enum GitGlobalError {
     BadSubcommand(String),
     Generic,

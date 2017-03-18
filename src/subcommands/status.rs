@@ -6,8 +6,10 @@ use std::thread;
 
 use git2;
 
-use core::{GitGlobalResult, Repo, get_repos};
+use config::Config;
 use errors::Result;
+use repo::Repo;
+use subcommands::SubcommandReport;
 
 /// Translates a file's status flags to their "short format" representation.
 ///
@@ -47,9 +49,9 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     let git2_repo = match repo.as_git2_repo() {
         None => {
             writeln!(&mut stderr(),
-                     "Could not open {} as a git repo. Perhaps you should run \
-                `git global scan` again.",
-                     repo)
+                    "Could not open {} as a git repo. Perhaps you should run \
+                    `git global scan` again.",
+                    repo)
                 .expect("failed to write to STDERR");
             return vec![];
         }
@@ -72,10 +74,10 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = get_repos();
+pub fn run(config: &Config) -> Result<SubcommandReport> {
+    let repos = config.get_repos();
     let n_repos = repos.len();
-    let mut result = GitGlobalResult::new(&repos);
+    let mut result = SubcommandReport::new(&repos);
     result.pad_repo_output();
     // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
     let (tx, rx) = mpsc::channel();
@@ -83,14 +85,14 @@ pub fn get_results() -> Result<GitGlobalResult> {
         let tx = tx.clone();
         let repo = Arc::new(repo);
         thread::spawn(move || {
-            let path = repo.path();
+            let path = repo.get_path();
             let lines = get_status_lines(repo);
             tx.send((path, lines)).unwrap();
         });
     }
     for _ in 0..n_repos {
         let (path, lines) = rx.recv().unwrap();
-        let repo = Repo::new(path.to_string());
+        let repo = Repo::new(path);
         for line in lines {
             result.add_repo_message(&repo, line);
         }

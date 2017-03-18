@@ -10,14 +10,15 @@
 //! The `scan` subcommand caches the list of git repos paths it finds, and can
 //! be rerun at any time to refresh the list.
 
-use core::{GitGlobalResult, cache_repos, find_repos};
+use config::Config;
 use errors::Result;
+use subcommands::SubcommandReport;
 
 /// Caches the results of `find_repos()` and says how many were found.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = find_repos();
-    cache_repos(&repos);
-    let mut result = GitGlobalResult::new(&repos);
+pub fn run(config: &Config) -> Result<SubcommandReport> {
+    config.update_cache();
+    let repos = config.get_repos();
+    let mut result = SubcommandReport::new(&repos);
     result.add_message(format!(
         "Found {} repos. Use `git global list` to show them.",
         repos.len()

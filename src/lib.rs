@@ -16,28 +16,33 @@
 //!
 //! # Public Interface
 //!
+//! This project's primary goal is produce a useful binary. There's no real
+//! intent to provide a good library for other Rust projects to use, so this
+//! documentation primarily serves to illustrate how the codebase is structured.
+//! If a library use case arises, however, that would be fine.
+//!
 //! The [`Repo`] struct is a git repository that is identified by the full path
 //! to its base directory (i.e., not its `.git` directory).
 //!
-//! The [`GitGlobalConfig`] struct holds a user's git-global configuration
-//! information, which merges some default values with values in the `[global]`
-//! section of the user's global `.gitconfig` file.
+//! The [`Config`] struct holds a user's git-global configuration information,
+//! which usually merges some default values with values in the `[global]`
+//! section of the user's global `.gitconfig` file. Provides access to the list
+//! of `Repo`s to subcommands via its `get_repos()` method, which populates a
+//! cache file, if necessary.
 //!
-//! A [`GitGlobalResult`] result contains messages added by a subcommand, either
-//! about the overall process or about a specific repo, as well as a list of
-//! repos. All subcommands expose a `get_results()` function that returns a
-//! `GitGlobalResult`.
+//! A [`SubcommandReport`] contains messages added by a subcommand, either about
+//! the overall process or about a specific repo, as well as the list of repos
+//! to which the report applies. All git-global subcommands are implemented as
+//! submodules in the [`subcommands`] module that expose a `run()` function.
 //!
-//! The [`get_repos()`] function returns the list of known repos, performing a
-//! scan if necessary.
-//!
-//! All git-global subcommands are implemented in the [`subcommands`] module.
+//! The [`run_from_command_line()`] function handles running git-global from the
+//! command line and is the effective entry point for the binary.
 //!
 //! [`Repo`]: struct.Repo.html
-//! [`GitGlobalConfig`]: struct.GitGlobalConfig.html
-//! [`GitGlobalResult`]: struct.GitGlobalResult.html
-//! [`get_repos()`]: fn.get_repos.html
+//! [`Config`]: struct.Config.html
+//! [`SubcommandReport`]: subcommands/struct.SubcommandReport.html
 //! [`subcommands`]: subcommands/index.html
+//! [`run_from_command_line()`]: fn.run_from_command_line.html
 
 extern crate app_dirs;
 extern crate chrono;
@@ -49,11 +54,14 @@ extern crate json;
 extern crate walkdir;
 
 mod cli;
-mod core;
+mod config;
 mod errors;
+mod repo;
 pub mod subcommands;  // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
-pub use core::{GitGlobalConfig, GitGlobalResult, Repo, get_repos};
+pub use config::Config;
 pub use errors::Result;
 pub use errors::GitGlobalError;
+pub use repo::Repo;
+pub use subcommands::SubcommandReport;

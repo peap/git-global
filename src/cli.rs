@@ -4,11 +4,12 @@ use std::io::{Write, stderr};
 
 use clap::{Arg, App, SubCommand};
 
-use core::GitGlobalResult;
+use config::Config;
 use errors::GitGlobalError;
 use subcommands;
+use subcommands::SubcommandReport;
 
-/// Returns the definitive clap::App instance for git-global.
+/// Returns the definitive `clap::App` instance for git-global.
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
     App::new("git-global")
         .version(crate_version!())
@@ -32,29 +33,30 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
 /// As the effective binary entry point for `git-global`, prints results to
 /// `STDOUT` and returns an exit code.
 pub fn run_from_command_line() -> i32 {
+    let config = Config::from_gitconfig();
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
     let use_json = matches.is_present("json");
-    let results = match matches.subcommand_name() {
-        Some("info") => subcommands::info::get_results(),
-        Some("list") => subcommands::list::get_results(),
-        Some("scan") => subcommands::scan::get_results(),
-        Some("status") => subcommands::status::get_results(),
+    let report_result = match matches.subcommand_name() {
+        Some("info") => subcommands::info::run(&config),
+        Some("list") => subcommands::list::run(&config),
+        Some("scan") => subcommands::scan::run(&config),
+        Some("status") => subcommands::status::run(&config),
         Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::status::get_results(),
+        None => subcommands::status::run(&config),
     };
-    match results {
-        Ok(res) => show_results(res, use_json),
+    match report_result {
+        Ok(report) => show_report(report, use_json),
         Err(err) => show_error(err, use_json),
     }
 }
 
-/// Writes results to STDOUT, as either text or JSON, and returns `0`.
-fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
+/// Writes report to STDOUT, as either text or JSON, and returns `0`.
+fn show_report(report: SubcommandReport, use_json: bool) -> i32 {
     if use_json {
-        results.print_json();
+        report.print_json();
     } else {
-        results.print();
+        report.print();
     }
     0
 }

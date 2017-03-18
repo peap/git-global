@@ -2,39 +2,39 @@ extern crate git_global;
 
 mod utils;
 
-use git_global::subcommands::scan;
+use git_global::subcommands;
 
 #[test]
 #[ignore]
 fn test_help() {
-    // to-do
+    // TODO
 }
 
 #[test]
 #[ignore]
 fn test_info() {
-    // to-do
+    // TODO
 }
 
 #[test]
 #[ignore]
 fn test_list() {
-    // to-do
+    // TODO
 }
 
 #[test]
-#[ignore]
 fn test_scan() {
-    utils::with_base_dir_of_three_repos(|ref path| {
-        // TODO: inject a GitGlobalConfig that takes `path` as its base directory
-        let result = scan::get_results();
-        assert!(result.is_ok());
+    utils::with_root_dir_of_three_repos(|config| {
+        let report_result = subcommands::scan::run(&config);
+        assert!(report_result.is_ok());
+        let report = report_result.unwrap();
+        assert_eq!(3, report.get_repos().len());
     });
 }
 
 #[test]
 #[ignore]
 fn test_status() {
-    // to-do
+    // TODO
 }
 
