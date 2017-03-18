@@ -12,13 +12,13 @@
 
 use config::Config;
 use errors::Result;
-use subcommands::SubcommandReport;
+use subcommands::Report;
 
 /// Caches the results of `find_repos()` and says how many were found.
-pub fn run(config: &Config) -> Result<SubcommandReport> {
+pub fn run(config: &Config) -> Result<Report> {
     config.update_cache();
     let repos = config.get_repos();
-    let mut result = SubcommandReport::new(&repos);
+    let mut result = Report::new(&repos);
     result.add_message(format!(
         "Found {} repos. Use `git global list` to show them.",
         repos.len()

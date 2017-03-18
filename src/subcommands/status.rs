@@ -9,7 +9,7 @@ use git2;
 use config::Config;
 use errors::Result;
 use repo::Repo;
-use subcommands::SubcommandReport;
+use subcommands::Report;
 
 /// Translates a file's status flags to their "short format" representation.
 ///
@@ -74,10 +74,10 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn run(config: &Config) -> Result<SubcommandReport> {
+pub fn run(config: &Config) -> Result<Report> {
     let repos = config.get_repos();
     let n_repos = repos.len();
-    let mut result = SubcommandReport::new(&repos);
+    let mut result = Report::new(&repos);
     result.pad_repo_output();
     // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
     let (tx, rx) = mpsc::channel();

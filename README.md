@@ -73,7 +73,7 @@ Following are some ideas that I've had about future subcommands:
       cache, and repo discovery functionality into it. Inject it into subcommands,
       for better testability.
     * Move `core::Repo` to `repo::Repo`.
-    * Move `core::GitGlobalResult` to `subcommands::SubcommandReport`.
+    * Move `core::GitGlobalResult` to `subcommands::Report`.
   * Fix JSON output for subcommand messages that don't apply to a specific repo,
     and only include repos in `repo_messages` that have messages.
   * Add tests.

@@ -30,9 +30,9 @@
 //! of `Repo`s to subcommands via its `get_repos()` method, which populates a
 //! cache file, if necessary.
 //!
-//! A [`SubcommandReport`] contains messages added by a subcommand, either about
-//! the overall process or about a specific repo, as well as the list of repos
-//! to which the report applies. All git-global subcommands are implemented as
+//! A [`Report`] contains messages added by a subcommand, either about the
+//! overall process or about a specific repo, as well as the list of repos to
+//! which the report applies. All git-global subcommands are implemented as
 //! submodules in the [`subcommands`] module that expose a `run()` function.
 //!
 //! The [`run_from_command_line()`] function handles running git-global from the
@@ -40,7 +40,7 @@
 //!
 //! [`Repo`]: struct.Repo.html
 //! [`Config`]: struct.Config.html
-//! [`SubcommandReport`]: subcommands/struct.SubcommandReport.html
+//! [`Report`]: subcommands/struct.Report.html
 //! [`subcommands`]: subcommands/index.html
 //! [`run_from_command_line()`]: fn.run_from_command_line.html
 
@@ -64,4 +64,4 @@ pub use config::Config;
 pub use errors::Result;
 pub use errors::GitGlobalError;
 pub use repo::Repo;
-pub use subcommands::SubcommandReport;
+pub use subcommands::Report;

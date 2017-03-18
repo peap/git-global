@@ -7,7 +7,7 @@ use clap::{Arg, App, SubCommand};
 use config::Config;
 use errors::GitGlobalError;
 use subcommands;
-use subcommands::SubcommandReport;
+use subcommands::Report;
 
 /// Returns the definitive `clap::App` instance for git-global.
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
@@ -52,7 +52,7 @@ pub fn run_from_command_line() -> i32 {
 }
 
 /// Writes report to STDOUT, as either text or JSON, and returns `0`.
-fn show_report(report: SubcommandReport, use_json: bool) -> i32 {
+fn show_report(report: Report, use_json: bool) -> i32 {
     if use_json {
         report.print_json();
     } else {

@@ -18,20 +18,20 @@ pub mod status;
 /// The result of a git-global subcommand.
 ///
 /// Contains overall messages, per-repo messages, and a list of repos.
-pub struct SubcommandReport {
+pub struct Report {
     messages: Vec<String>,
     repos: Vec<Repo>,
     repo_messages: HashMap<Repo, Vec<String>>,
     flag_pad_repo_output: bool,
 }
 
-impl SubcommandReport {
-    pub fn new(repos: &Vec<Repo>) -> SubcommandReport {
+impl Report {
+    pub fn new(repos: &Vec<Repo>) -> Report {
         let mut repo_messages: HashMap<Repo, Vec<String>> = HashMap::new();
         for repo in repos {
             repo_messages.insert(repo.clone(), Vec::new());
         }
-        SubcommandReport {
+        Report {
             messages: Vec::new(),
             repos: repos.clone(),
             repo_messages: repo_messages,

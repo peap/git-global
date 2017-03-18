@@ -7,7 +7,7 @@ use std::time::SystemTime;
 
 use config::Config;
 use errors::Result;
-use subcommands::SubcommandReport;
+use subcommands::Report;
 
 /// Returns the age of a file in terms of days, hours, minutes, and seconds.
 fn get_age(filename: PathBuf) -> Option<String> {
@@ -26,9 +26,9 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn run(config: &Config) -> Result<SubcommandReport> {
+pub fn run(config: &Config) -> Result<Report> {
     let repos = config.get_repos();
-    let mut result = SubcommandReport::new(&repos);
+    let mut result = Report::new(&repos);
     let version = format!("{}", crate_version!());
     // beginning of underline:   git-global x.x.x
     let mut underline = format!("===========");
