@@ -43,6 +43,7 @@ extern crate app_dirs;
 extern crate chrono;
 #[macro_use]
 extern crate clap;
+extern crate dirs;
 extern crate git2;
 #[macro_use]
 extern crate json;

@@ -4,13 +4,13 @@
 //! the `get_repos()` function.
 
 use std::collections::HashMap;
-use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use app_dirs::{AppInfo, AppDataType, app_dir, get_app_dir};
+use dirs::home_dir;
 use git2;
 use walkdir::{DirEntry, WalkDir, WalkDirIterator};
 
@@ -148,7 +148,7 @@ pub struct GitGlobalConfig {
 
 impl GitGlobalConfig {
     pub fn new() -> GitGlobalConfig {
-        let home_dir = env::home_dir()
+        let home_dir = home_dir()
             .expect("Could not determine home directory.")
             .to_str()
             .expect("Could not convert home directory path to string.")

@@ -25,7 +25,7 @@ fn test_list() {
 #[test]
 #[ignore]
 fn test_scan() {
-    utils::with_base_dir_of_three_repos(|ref path| {
+    utils::with_base_dir_of_three_repos(|ref _path| {
         // TODO: inject a GitGlobalConfig that takes `path` as its base directory
         let result = scan::get_results();
         assert!(result.is_ok());

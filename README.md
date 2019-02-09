@@ -63,5 +63,6 @@ git config --global global.ignore .cargo,.vim,Library
   * add tests
   * expand documentation and package metadata
   * update dependency versions
+  * switch from `std::env::home_dir` to `dirs::home_dir`
 * 0.1.0 (1/31/17)
   * initial release with the following subcommands: help, info, list, scan, status
