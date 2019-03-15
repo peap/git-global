@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use app_dirs::{AppInfo, AppDataType, app_dir, get_app_dir};
 use dirs::home_dir;
 use git2;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 const APP: AppInfo = AppInfo { name: "git-global", author: "peap" };
 const CACHE_FILE: &'static str = "repos.txt";
@@ -178,13 +178,15 @@ impl GitGlobalConfig {
         }
     }
 
-//    /// Returns `true` if this directory entry should be included in scans.
-//    fn filter(&self, entry: &DirEntry) -> bool {
-//        let entry_path = entry.path().to_str().expect("DirEntry without path.");
-//        self.ignored_patterns
-//            .iter()
-//            .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
-//    }
+    /// Returns `true` if this directory entry should be included in scans.
+    fn filter(&self, entry: &DirEntry) -> bool {
+        let entry_path = entry.path().to_str().expect("DirEntry without path.");
+        
+        self.ignored_patterns
+            .iter()
+            .filter(|p| p !=&"")
+            .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
+    }
 
     /// Returns boolean indicating if the cache file exists.
     fn has_cache(&self) -> bool {
@@ -235,7 +237,7 @@ pub fn find_repos() -> Vec<Repo> {
     
     println!("Scanning for git repos under {}; this may take a while...",
              basedir);
-    for entry in WalkDir::new(basedir) {
+    for entry in WalkDir::new(basedir).into_iter().filter_entry(|e| user_config.filter(e)) {
         match entry {
             Ok(entry) => {
                 if entry.file_type().is_dir() && entry.file_name() == ".git" {
