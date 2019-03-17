@@ -53,10 +53,12 @@ mod cli;
 mod config;
 mod core;
 mod errors;
+mod repo;
 pub mod subcommands; // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
 pub use config::GitGlobalConfig;
-pub use core::{get_repos, GitGlobalResult, Repo};
+pub use core::{get_repos, GitGlobalResult};
 pub use errors::GitGlobalError;
 pub use errors::Result;
+pub use repo::Repo;

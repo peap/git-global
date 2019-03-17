@@ -7,8 +7,9 @@ use std::thread;
 use git2;
 
 use config::GitGlobalConfig;
-use core::{get_repos, GitGlobalResult, Repo};
+use core::{get_repos, GitGlobalResult};
 use errors::Result;
+use repo::Repo;
 
 /// Translates a file's status flags to their "short format" representation.
 ///

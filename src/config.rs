@@ -9,7 +9,7 @@ use dirs::home_dir;
 use git2;
 use walkdir::{DirEntry, WalkDir};
 
-use core::Repo;
+use repo::Repo;
 
 const APP: AppInfo = AppInfo {
     name: "git-global",
