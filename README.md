@@ -64,6 +64,7 @@ git config --global global.ignore .cargo,.vim,Library
   * expand documentation and package metadata
   * update dependency versions
   * switch from `std::env::home_dir` to `dirs::home_dir`
-  * #1: fix bug with scanning directories when nothing is configured to be ignored
+  * fix bug with scanning directories when nothing is configured to be ignored
+    ([#1](https://github.com/peap/git-global/pull/1))
 * 0.1.0 (1/31/17)
   * initial release with the following subcommands: help, info, list, scan, status
