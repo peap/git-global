@@ -4,7 +4,7 @@ use std::io::{stderr, Write};
 
 use clap::{App, Arg, SubCommand};
 
-use core::GitGlobalResult;
+use core::{GitGlobalConfig, GitGlobalResult};
 use errors::GitGlobalError;
 use subcommands;
 
@@ -44,15 +44,16 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
-    let use_json = matches.is_present("json");
+    let config = GitGlobalConfig::new();
     let results = match matches.subcommand_name() {
-        Some("info") => subcommands::info::get_results(),
-        Some("list") => subcommands::list::get_results(),
-        Some("scan") => subcommands::scan::get_results(),
-        Some("status") => subcommands::status::get_results(),
+        Some("info") => subcommands::info::get_results(config),
+        Some("list") => subcommands::list::get_results(config),
+        Some("scan") => subcommands::scan::get_results(config),
+        Some("status") => subcommands::status::get_results(config),
         Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::status::get_results(),
+        None => subcommands::status::get_results(config),
     };
+    let use_json = matches.is_present("json");
     match results {
         Ok(res) => show_results(res, use_json),
         Err(err) => show_error(err, use_json),

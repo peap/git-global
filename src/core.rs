@@ -239,10 +239,9 @@ impl GitGlobalConfig {
 }
 
 /// Walks the configured base directory, looking for git repos.
-pub fn find_repos() -> Vec<Repo> {
+pub fn find_repos(config: &GitGlobalConfig) -> Vec<Repo> {
     let mut repos = Vec::new();
-    let user_config = GitGlobalConfig::new();
-    let basedir = &user_config.basedir;
+    let basedir = &config.basedir;
 
     println!(
         "Scanning for git repos under {}; this may take a while...",
@@ -250,7 +249,7 @@ pub fn find_repos() -> Vec<Repo> {
     );
     for entry in WalkDir::new(basedir)
         .into_iter()
-        .filter_entry(|e| user_config.filter(e))
+        .filter_entry(|e| config.filter(e))
     {
         match entry {
             Ok(entry) => {
@@ -275,19 +274,17 @@ pub fn find_repos() -> Vec<Repo> {
 }
 
 /// Caches repo list to disk, in the XDG cache directory for git-global.
-pub fn cache_repos(repos: &Vec<Repo>) {
-    let user_config = GitGlobalConfig::new();
-    user_config.cache_repos(repos);
+pub fn cache_repos(config: &mut GitGlobalConfig, repos: &Vec<Repo>) {
+    config.cache_repos(repos);
 }
 
 /// Returns all known git repos, populating the cache first, if necessary.
-pub fn get_repos() -> Vec<Repo> {
-    let user_config = GitGlobalConfig::new();
-    if !user_config.has_cache() {
-        let repos = find_repos();
-        cache_repos(&repos);
+pub fn get_repos(config: &mut GitGlobalConfig) -> Vec<Repo> {
+    if !config.has_cache() {
+        let repos = find_repos(config);
+        cache_repos(config, &repos);
         repos
     } else {
-        user_config.get_cached_repos()
+        config.get_cached_repos()
     }
 }

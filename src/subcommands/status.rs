@@ -6,7 +6,7 @@ use std::thread;
 
 use git2;
 
-use core::{get_repos, GitGlobalResult, Repo};
+use core::{get_repos, GitGlobalConfig, GitGlobalResult, Repo};
 use errors::Result;
 
 /// Translates a file's status flags to their "short format" representation.
@@ -76,8 +76,8 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = get_repos();
+pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+    let repos = get_repos(&mut config);
     let n_repos = repos.len();
     let mut result = GitGlobalResult::new(&repos);
     result.pad_repo_output();

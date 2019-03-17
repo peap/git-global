@@ -29,10 +29,9 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = get_repos();
+pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+    let repos = get_repos(&mut config);
     let mut result = GitGlobalResult::new(&repos);
-    let config = GitGlobalConfig::new();
     let version = format!("{}", crate_version!());
     // beginning of underline:   git-global x.x.x
     let mut underline = format!("===========");

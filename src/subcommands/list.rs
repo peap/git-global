@@ -1,11 +1,11 @@
 //! The `list` subcommand: lists all repos known to git-global.
 
-use core::{get_repos, GitGlobalResult};
+use core::{get_repos, GitGlobalConfig, GitGlobalResult};
 use errors::Result;
 
 /// Forces the display of each repo path, without any extra output.
-pub fn get_results() -> Result<GitGlobalResult> {
-    let repos = get_repos();
+pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+    let repos = get_repos(&mut config);
     let mut result = GitGlobalResult::new(&repos);
     for repo in repos.iter() {
         // GitGlobalResult.print() already prints out the repo name if it has
