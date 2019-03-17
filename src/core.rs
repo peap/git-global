@@ -1,45 +1,14 @@
 //! Core functionality of git-global.
 //!
-//! Includes the `Repo`, and `GitGlobalResult` structs, and the `get_repos()`,
-//! `cache_repos()`, and `find_repos()` functions.
+//! Includes the `GitGlobalResult` struct and the `get_repos()`, `cache_repos()`,
+//! and `find_repos()` functions.
 
 use std::collections::HashMap;
-use std::fmt;
 
-use git2;
 use walkdir::WalkDir;
 
 use config::GitGlobalConfig;
-
-/// A git repository, represented by the full path to its base directory.
-#[derive(PartialEq, Eq, Hash, Clone)]
-pub struct Repo {
-    path: String,
-}
-
-impl Repo {
-    pub fn new(path: String) -> Repo {
-        Repo {
-            path: path,
-        }
-    }
-
-    /// Returns the full path to the repo as a `String`.
-    pub fn path(&self) -> String {
-        self.path.clone()
-    }
-
-    /// Returns the `git2::Repository` equivalent of this repo.
-    pub fn as_git2_repo(&self) -> Option<git2::Repository> {
-        git2::Repository::open(&self.path).ok()
-    }
-}
-
-impl fmt::Display for Repo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.path)
-    }
-}
+use repo::Repo;
 
 /// The result of a git-global subcommand.
 ///
@@ -118,10 +87,10 @@ impl GitGlobalResult {
                 .expect("Failing pushing message to JSON messages array.");
         }
         for (repo, messages) in self.repo_messages.iter() {
-            json["repo_messages"][&repo.path] = array![];
+            json["repo_messages"][repo.path()] = array![];
             if messages.len() > 0 {
                 for line in messages.iter().filter(|l| *l != "") {
-                    json["repo_messages"][&repo.path]
+                    json["repo_messages"][repo.path()]
                         .push(line.to_string())
                         .expect(
                             "Failed pushing line to JSON repo-messages array.",
