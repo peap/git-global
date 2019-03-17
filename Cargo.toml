@@ -20,12 +20,12 @@ name = "git-global"
 doc = false
 
 [dependencies]
-app_dirs = "1"
+app_dirs = "1.2"
 clap = "2"
 chrono = "0.3"
 dirs = "1"
 json = "0.11"
-walkdir = "1"
+walkdir = "2"
 
 [dev-dependencies]
 tempdir = "0.3"
