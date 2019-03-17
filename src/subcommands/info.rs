@@ -5,7 +5,8 @@ use chrono::Duration;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use core::{get_repos, GitGlobalConfig, GitGlobalResult};
+use config::GitGlobalConfig;
+use core::{get_repos, GitGlobalResult};
 use errors::Result;
 
 /// Returns the age of a file in terms of days, hours, minutes, and seconds.

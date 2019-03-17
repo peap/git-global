@@ -4,7 +4,8 @@ use std::io::{stderr, Write};
 
 use clap::{App, Arg, SubCommand};
 
-use core::{GitGlobalConfig, GitGlobalResult};
+use config::GitGlobalConfig;
+use core::GitGlobalResult;
 use errors::GitGlobalError;
 use subcommands;
 

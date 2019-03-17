@@ -2,8 +2,8 @@ extern crate git_global;
 
 mod utils;
 
-use git_global::GitGlobalConfig;
 use git_global::subcommands::scan;
+use git_global::GitGlobalConfig;
 
 #[test]
 #[ignore]

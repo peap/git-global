@@ -50,11 +50,13 @@ extern crate json;
 extern crate walkdir;
 
 mod cli;
+mod config;
 mod core;
 mod errors;
 pub mod subcommands; // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
-pub use core::{get_repos, GitGlobalConfig, GitGlobalResult, Repo};
+pub use config::GitGlobalConfig;
+pub use core::{get_repos, GitGlobalResult, Repo};
 pub use errors::GitGlobalError;
 pub use errors::Result;
