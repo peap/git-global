@@ -1,12 +1,12 @@
 //! The `status` subcommand: shows `git status -s` for all known repos.
 
-use std::io::{Write, stderr};
-use std::sync::{Arc, mpsc};
+use std::io::{stderr, Write};
+use std::sync::{mpsc, Arc};
 use std::thread;
 
 use git2;
 
-use core::{GitGlobalResult, Repo, get_repos};
+use core::{get_repos, GitGlobalResult, Repo};
 use errors::Result;
 
 /// Translates a file's status flags to their "short format" representation.
@@ -46,11 +46,13 @@ fn get_short_format_status(path: &str, status: git2::Status) -> String {
 fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     let git2_repo = match repo.as_git2_repo() {
         None => {
-            writeln!(&mut stderr(),
-                     "Could not open {} as a git repo. Perhaps you should run \
-                `git global scan` again.",
-                     repo)
-                .expect("failed to write to STDERR");
+            writeln!(
+                &mut stderr(),
+                "Could not open {} as a git repo. Perhaps you should run \
+                 `git global scan` again.",
+                repo
+            )
+            .expect("failed to write to STDERR");
             return vec![];
         }
         Some(repo) => repo,
@@ -58,9 +60,11 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     let mut opts = git2::StatusOptions::new();
     opts.show(git2::StatusShow::IndexAndWorkdir)
         .include_ignored(false);
-    let statuses = git2_repo.statuses(Some(&mut opts))
+    let statuses = git2_repo
+        .statuses(Some(&mut opts))
         .expect(&format!("Could not get statuses for {}.", repo));
-    statuses.iter()
+    statuses
+        .iter()
         .map(|entry| {
             let path = entry.path().unwrap();
             let status = entry.status();

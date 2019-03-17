@@ -9,12 +9,15 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
-use app_dirs::{AppInfo, AppDataType, app_dir, get_app_dir};
+use app_dirs::{app_dir, get_app_dir, AppDataType, AppInfo};
 use dirs::home_dir;
 use git2;
 use walkdir::{DirEntry, WalkDir};
 
-const APP: AppInfo = AppInfo { name: "git-global", author: "peap" };
+const APP: AppInfo = AppInfo {
+    name: "git-global",
+    author: "peap",
+};
 const CACHE_FILE: &'static str = "repos.txt";
 const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
@@ -115,7 +118,7 @@ impl GitGlobalResult {
 
     /// Writes all result messages to STDOUT, as JSON.
     pub fn print_json(&self) {
-        let mut json = object!{
+        let mut json = object! {
             "error" => false,
             "messages" => array![],
             "repo_messages" => object!{}
@@ -131,7 +134,9 @@ impl GitGlobalResult {
                 for line in messages.iter().filter(|l| *l != "") {
                     json["repo_messages"][&repo.path]
                         .push(line.to_string())
-                        .expect("Failed pushing line to JSON repo-messages array.");
+                        .expect(
+                            "Failed pushing line to JSON repo-messages array.",
+                        );
                 }
             }
         }
@@ -154,23 +159,25 @@ impl GitGlobalConfig {
             .expect("Could not convert home directory path to string.")
             .to_string();
         let (basedir, patterns) = match git2::Config::open_default() {
-            Ok(config) => {
-                (config.get_string(SETTING_BASEDIR).unwrap_or(home_dir),
-                 config.get_string(SETTING_IGNORED)
-                     .unwrap_or(String::new())
-                     .split(",")
-                     .map(|p| p.trim().to_string())
-                     .collect())
-            }
+            Ok(config) => (
+                config.get_string(SETTING_BASEDIR).unwrap_or(home_dir),
+                config
+                    .get_string(SETTING_IGNORED)
+                    .unwrap_or(String::new())
+                    .split(",")
+                    .map(|p| p.trim().to_string())
+                    .collect(),
+            ),
             Err(_) => (home_dir, Vec::new()),
         };
-        let cache_file = match get_app_dir(AppDataType::UserCache, &APP, "cache") {
-            Ok(mut dir) => {
-                dir.push(CACHE_FILE);
-                dir
-            }
-            Err(_) => panic!("TODO: work without XDG"),
-        };
+        let cache_file =
+            match get_app_dir(AppDataType::UserCache, &APP, "cache") {
+                Ok(mut dir) => {
+                    dir.push(CACHE_FILE);
+                    dir
+                }
+                Err(_) => panic!("TODO: work without XDG"),
+            };
         GitGlobalConfig {
             basedir: basedir,
             ignored_patterns: patterns,
@@ -181,10 +188,10 @@ impl GitGlobalConfig {
     /// Returns `true` if this directory entry should be included in scans.
     fn filter(&self, entry: &DirEntry) -> bool {
         let entry_path = entry.path().to_str().expect("DirEntry without path.");
-        
+
         self.ignored_patterns
             .iter()
-            .filter(|p| p !=&"")
+            .filter(|p| p != &"")
             .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
     }
 
@@ -203,7 +210,8 @@ impl GitGlobalConfig {
                 Err(e) => panic!("Could not create cache directory: {}", e),
             }
         }
-        let mut f = File::create(&self.cache_file).expect("Could not create cache file.");
+        let mut f = File::create(&self.cache_file)
+            .expect("Could not create cache file.");
         for repo in repos.iter() {
             match writeln!(f, "{}", repo.path()) {
                 Ok(_) => (),
@@ -216,12 +224,13 @@ impl GitGlobalConfig {
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
         if self.cache_file.as_path().exists() {
-            let f = File::open(&self.cache_file).expect("Could not open cache file.");
+            let f = File::open(&self.cache_file)
+                .expect("Could not open cache file.");
             let reader = BufReader::new(f);
             for line in reader.lines() {
                 match line {
                     Ok(repo_path) => repos.push(Repo::new(repo_path)),
-                    Err(_) => (),  // TODO: handle errors
+                    Err(_) => (), // TODO: handle errors
                 }
             }
         }
@@ -234,14 +243,22 @@ pub fn find_repos() -> Vec<Repo> {
     let mut repos = Vec::new();
     let user_config = GitGlobalConfig::new();
     let basedir = &user_config.basedir;
-    
-    println!("Scanning for git repos under {}; this may take a while...",
-             basedir);
-    for entry in WalkDir::new(basedir).into_iter().filter_entry(|e| user_config.filter(e)) {
+
+    println!(
+        "Scanning for git repos under {}; this may take a while...",
+        basedir
+    );
+    for entry in WalkDir::new(basedir)
+        .into_iter()
+        .filter_entry(|e| user_config.filter(e))
+    {
         match entry {
             Ok(entry) => {
                 if entry.file_type().is_dir() && entry.file_name() == ".git" {
-                    let parent_path = entry.path().parent().expect("Could not determine parent.");
+                    let parent_path = entry
+                        .path()
+                        .parent()
+                        .expect("Could not determine parent.");
                     match parent_path.to_str() {
                         Some(path) => {
                             repos.push(Repo::new(path.to_string()));

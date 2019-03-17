@@ -10,7 +10,7 @@
 //! The `scan` subcommand caches the list of git repos paths it finds, and can
 //! be rerun at any time to refresh the list.
 
-use core::{GitGlobalResult, cache_repos, find_repos};
+use core::{cache_repos, find_repos, GitGlobalResult};
 use errors::Result;
 
 /// Caches the results of `find_repos()` and says how many were found.

@@ -52,9 +52,9 @@ extern crate walkdir;
 mod cli;
 mod core;
 mod errors;
-pub mod subcommands;  // Using `pub mod` so we see the docs.
+pub mod subcommands; // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
-pub use core::{GitGlobalConfig, GitGlobalResult, Repo, get_repos};
-pub use errors::Result;
+pub use core::{get_repos, GitGlobalConfig, GitGlobalResult, Repo};
 pub use errors::GitGlobalError;
+pub use errors::Result;

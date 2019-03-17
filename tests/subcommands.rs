@@ -37,4 +37,3 @@ fn test_scan() {
 fn test_status() {
     // to-do
 }
-

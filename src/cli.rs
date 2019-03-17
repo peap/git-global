@@ -1,8 +1,8 @@
 //! The command line interface for git-global.
 
-use std::io::{Write, stderr};
+use std::io::{stderr, Write};
 
-use clap::{Arg, App, SubCommand};
+use clap::{App, Arg, SubCommand};
 
 use core::GitGlobalResult;
 use errors::GitGlobalError;
@@ -14,17 +14,27 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         .version(crate_version!())
         .author("Eric Petersen <eric@ericpetersen.io>")
         .about("git subcommand for working with all git repos on a machine")
-        .arg(Arg::with_name("json")
-            .long("json")
-            .help("Output results in JSON."))
-        .subcommand(SubCommand::with_name("info")
-            .about("show meta-information about git-global"))
-        .subcommand(SubCommand::with_name("list")
-            .about("lists all git repos on your machine [the default]"))
-        .subcommand(SubCommand::with_name("scan")
-            .about("update cache of git repos on your machine"))
-        .subcommand(SubCommand::with_name("status")
-            .about("shows status of all git repos"))
+        .arg(
+            Arg::with_name("json")
+                .long("json")
+                .help("Output results in JSON."),
+        )
+        .subcommand(
+            SubCommand::with_name("info")
+                .about("show meta-information about git-global"),
+        )
+        .subcommand(
+            SubCommand::with_name("list")
+                .about("lists all git repos on your machine [the default]"),
+        )
+        .subcommand(
+            SubCommand::with_name("scan")
+                .about("update cache of git repos on your machine"),
+        )
+        .subcommand(
+            SubCommand::with_name("status")
+                .about("shows status of all git repos"),
+        )
 }
 
 /// Runs the appropriate git-global subcommand based on command line arguments.
@@ -62,7 +72,7 @@ fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
 /// Writes errors to STDERR, as either text or JSON, and returns `1`.
 fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
     if use_json {
-        let json = object!{
+        let json = object! {
             "error" => true,
             "message" => format!("{}", error)
         };
