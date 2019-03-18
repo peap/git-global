@@ -64,6 +64,7 @@ The following are some ideas I've had about future subcommands and features:
 ## Release Notes
 
 * 0.2.0 (2019-03-18)
+  * Include untracked files in status output.
   * Expand documentation and package metadata.
   * Update and change several dependencies.
   * Add some tests.

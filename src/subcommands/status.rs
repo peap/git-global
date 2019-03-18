@@ -16,29 +16,33 @@ use report::Report;
 /// Follows an example in the git2-rs crate's `examples/status.rs`.
 fn get_short_format_status(path: &str, status: git2::Status) -> String {
     let mut istatus = match status {
-        s if s.contains(git2::Status::INDEX_NEW) => 'A',
-        s if s.contains(git2::Status::INDEX_MODIFIED) => 'M',
-        s if s.contains(git2::Status::INDEX_DELETED) => 'D',
-        s if s.contains(git2::Status::INDEX_RENAMED) => 'R',
-        s if s.contains(git2::Status::INDEX_TYPECHANGE) => 'T',
+        s if s.is_index_new() => 'A',
+        s if s.is_index_modified() => 'M',
+        s if s.is_index_deleted() => 'D',
+        s if s.is_index_renamed() => 'R',
+        s if s.is_index_typechange() => 'T',
         _ => ' ',
     };
     let mut wstatus = match status {
-        s if s.contains(git2::Status::WT_NEW) => {
+        s if s.is_wt_new() => {
             if istatus == ' ' {
                 istatus = '?';
             }
             '?'
         }
-        s if s.contains(git2::Status::WT_MODIFIED) => 'M',
-        s if s.contains(git2::Status::WT_DELETED) => 'D',
-        s if s.contains(git2::Status::WT_RENAMED) => 'R',
-        s if s.contains(git2::Status::WT_TYPECHANGE) => 'T',
+        s if s.is_wt_modified() => 'M',
+        s if s.is_wt_deleted() => 'D',
+        s if s.is_wt_renamed() => 'R',
+        s if s.is_wt_typechange() => 'T',
         _ => ' ',
     };
-    if status.contains(git2::Status::IGNORED) {
+    if status.is_ignored() {
         istatus = '!';
         wstatus = '!';
+    }
+    if status.is_conflicted() {
+        istatus = 'C';
+        wstatus = 'C';
     }
     // TODO: handle submodule statuses?
     format!("{}{} {}", istatus, wstatus, path)
@@ -61,6 +65,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     };
     let mut opts = git2::StatusOptions::new();
     opts.show(git2::StatusShow::IndexAndWorkdir)
+        .include_untracked(true)
         .include_ignored(false);
     let statuses = git2_repo
         .statuses(Some(&mut opts))
