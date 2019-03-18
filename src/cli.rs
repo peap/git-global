@@ -5,7 +5,6 @@ use std::io::{stderr, stdout, Write};
 use clap::{App, Arg, SubCommand};
 
 use config::GitGlobalConfig;
-use errors::GitGlobalError;
 use subcommands;
 
 /// Returns the definitive clap::App instance for git-global.
@@ -45,12 +44,8 @@ pub fn run_from_command_line() -> i32 {
     let matches = clap_app.get_matches();
     let config = GitGlobalConfig::new();
     let report = match matches.subcommand_name() {
-        Some("info") => subcommands::info::execute(config),
-        Some("list") => subcommands::list::execute(config),
-        Some("scan") => subcommands::scan::execute(config),
-        Some("status") => subcommands::status::execute(config),
-        Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::status::execute(config),
+        Some(cmd) => subcommands::run(cmd, config),
+        None => subcommands::run("status", config),
     };
     let use_json = matches.is_present("json");
     match report {
