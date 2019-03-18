@@ -7,7 +7,6 @@ use std::thread;
 use git2;
 
 use config::GitGlobalConfig;
-use core::get_repos;
 use errors::Result;
 use repo::Repo;
 use report::Report;
@@ -72,7 +71,6 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
             let path = entry.path().unwrap();
             let status = entry.status();
             let status_for_path = get_short_format_status(path, status);
-            // result.add_repo_message(repo, format!("{}", status_for_path));
             format!("{}", status_for_path)
         })
         .collect()
@@ -80,10 +78,10 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 
 /// Gathers `git status -s` for all known repos.
 pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
-    let repos = get_repos(&mut config);
+    let repos = config.get_repos();
     let n_repos = repos.len();
-    let mut result = Report::new(&repos);
-    result.pad_repo_output();
+    let mut report = Report::new(&repos);
+    report.pad_repo_output();
     // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
     let (tx, rx) = mpsc::channel();
     for repo in repos {
@@ -99,8 +97,8 @@ pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
         let (path, lines) = rx.recv().unwrap();
         let repo = Repo::new(path.to_string());
         for line in lines {
-            result.add_repo_message(&repo, line);
+            report.add_repo_message(&repo, line);
         }
     }
-    Ok(result)
+    Ok(report)
 }

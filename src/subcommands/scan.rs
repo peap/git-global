@@ -11,18 +11,17 @@
 //! be rerun at any time to refresh the list.
 
 use config::GitGlobalConfig;
-use core::{cache_repos, find_repos};
 use errors::Result;
 use report::Report;
 
-/// Caches the results of `find_repos()` and says how many were found.
+/// Clears the cache, forces a rescan, and says how many repos were found.
 pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
-    let repos = find_repos(&mut config);
-    cache_repos(&mut config, &repos);
-    let mut result = Report::new(&repos);
-    result.add_message(format!(
+    config.clear_cache();
+    let repos = config.get_repos();
+    let mut report = Report::new(&repos);
+    report.add_message(format!(
         "Found {} repos. Use `git global list` to show them.",
         repos.len()
     ));
-    Ok(result)
+    Ok(report)
 }

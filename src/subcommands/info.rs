@@ -6,7 +6,6 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 use config::GitGlobalConfig;
-use core::get_repos;
 use errors::Result;
 use report::Report;
 
@@ -32,28 +31,28 @@ fn get_age(filename: PathBuf) -> Option<String> {
 
 /// Gathers metadata about the git-global installation.
 pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
-    let repos = get_repos(&mut config);
-    let mut result = Report::new(&repos);
+    let repos = config.get_repos();
+    let mut report = Report::new(&repos);
     let version = format!("{}", crate_version!());
     // beginning of underline:   git-global x.x.x
     let mut underline = format!("===========");
     for _ in 0..version.len() {
         underline.push('=');
     }
-    result.add_message(format!("git-global {}", version));
-    result.add_message(underline);
-    result.add_message(format!("Number of repos: {}", repos.len()));
-    result.add_message(format!("Base directory: {}", config.basedir));
-    result.add_message(format!(
+    report.add_message(format!("git-global {}", version));
+    report.add_message(underline);
+    report.add_message(format!("Number of repos: {}", repos.len()));
+    report.add_message(format!("Base directory: {}", config.basedir));
+    report.add_message(format!(
         "Cache file: {}",
         config.cache_file.to_str().unwrap()
     ));
     if let Some(age) = get_age(config.cache_file) {
-        result.add_message(format!("Cache file age: {}", age));
+        report.add_message(format!("Cache file age: {}", age));
     }
-    result.add_message(format!("Ignored patterns:"));
+    report.add_message(format!("Ignored patterns:"));
     for pat in config.ignored_patterns.iter() {
-        result.add_message(format!("  {}", pat));
+        report.add_message(format!("  {}", pat));
     }
-    Ok(result)
+    Ok(report)
 }

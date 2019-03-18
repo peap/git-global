@@ -1,13 +1,18 @@
 //! Configuration of git-global.
+//!
+//! Exports the `GitGlobalConfig` struct, which defines the base path for
+//! finding git repos on the machine, path patterns to ignore when scanning for
+//! repos, and the location of a cache file to prevent scanning the filesystem
+//! every time the list of known repos is needed.
 
-use std::fs::File;
+use std::fs::{remove_file, File};
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use app_dirs::{app_dir, get_app_dir, AppDataType, AppInfo};
 use dirs::home_dir;
 use git2;
-use walkdir::DirEntry;
+use walkdir::{DirEntry, WalkDir};
 
 use repo::Repo;
 
@@ -60,8 +65,26 @@ impl GitGlobalConfig {
         }
     }
 
+    /// Returns all known git repos, populating the cache first, if necessary.
+    pub fn get_repos(&mut self) -> Vec<Repo> {
+        if !self.has_cache() {
+            let repos = self.find_repos();
+            self.cache_repos(&repos);
+        }
+        self.get_cached_repos()
+    }
+
+    /// Clears the cache of known git repos, forcing a re-scan on the next
+    /// get_repos() call.
+    pub fn clear_cache(&mut self) {
+        if self.has_cache() {
+            remove_file(&self.cache_file)
+                .expect("Failed to delete cache file.");
+        }
+    }
+
     /// Returns `true` if this directory entry should be included in scans.
-    pub fn filter(&self, entry: &DirEntry) -> bool {
+    fn filter(&self, entry: &DirEntry) -> bool {
         let entry_path = entry.path().to_str().expect("DirEntry without path.");
 
         self.ignored_patterns
@@ -70,8 +93,43 @@ impl GitGlobalConfig {
             .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
     }
 
+    /// Walks the configured base directory, looking for git repos.
+    fn find_repos(&self) -> Vec<Repo> {
+        let mut repos = Vec::new();
+        let basedir = &self.basedir;
+        println!(
+            "Scanning for git repos under {}; this may take a while...",
+            basedir
+        );
+        for entry in WalkDir::new(basedir)
+            .into_iter()
+            .filter_entry(|e| self.filter(e))
+        {
+            match entry {
+                Ok(entry) => {
+                    if entry.file_type().is_dir() && entry.file_name() == ".git"
+                    {
+                        let parent_path = entry
+                            .path()
+                            .parent()
+                            .expect("Could not determine parent.");
+                        match parent_path.to_str() {
+                            Some(path) => {
+                                repos.push(Repo::new(path.to_string()));
+                            }
+                            None => (),
+                        }
+                    }
+                }
+                Err(_) => (),
+            }
+        }
+        repos.sort_by(|a, b| a.path().cmp(&b.path()));
+        repos
+    }
+
     /// Returns boolean indicating if the cache file exists.
-    pub fn has_cache(&self) -> bool {
+    fn has_cache(&self) -> bool {
         self.cache_file.as_path().exists()
     }
 

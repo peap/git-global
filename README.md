@@ -58,13 +58,15 @@ git config --global global.ignore .cargo,.vim,Library
 
 ## Release Notes
 
-* 0.1.1 (work-in-progress)
-  * add tests
+* 0.2.0 (work-in-progress)
   * expand documentation and package metadata
-  * update dependency versions
-  * switch from `std::env::home_dir` to `dirs::home_dir`
+  * update and change several dependencies
+  * add some tests
   * fix bug with scanning directories when nothing is configured to be ignored
     ([#1](https://github.com/peap/git-global/pull/1))
-  * rename `GitGlobalResult` to `Report`
+  * several public API changes, such as:
+    * moving `get_repos` function to `GitGlobalConfig.get_repos`
+    * renaming `GitGlobalResult` to `Report`
+    * splitting the `core` module into `config`, `repo`, and `report`
 * 0.1.0 (1/31/17)
   * initial release with the following subcommands: help, info, list, scan, status
