@@ -23,19 +23,19 @@
 //! information, which merges some default values with values in the `[global]`
 //! section of the user's global `.gitconfig` file.
 //!
-//! A [`GitGlobalResult`] result contains messages added by a subcommand, either
-//! about the overall process or about a specific repo, as well as a list of
-//! repos. All subcommands expose an `execute()` function that takes ownership
-//! of a `GitGlobalConfig` struct and returns a `GitGlobalResult`.
+//! A [`Report`] contains results messages added by a subcommand, either about
+//! the overall process or about a specific repo, as well as a list of repos.
+//! All subcommands expose an `execute()` function that takes ownership of a
+//! `GitGlobalConfig` struct and returns a `Report`.
 //!
 //! The [`get_repos()`] function returns the list of known repos, performing a
 //! scan if necessary.
 //!
 //! All git-global subcommands are implemented in the [`subcommands`] module.
 //!
-//! [`Repo`]: struct.Repo.html
 //! [`GitGlobalConfig`]: struct.GitGlobalConfig.html
-//! [`GitGlobalResult`]: struct.GitGlobalResult.html
+//! [`Repo`]: struct.Repo.html
+//! [`Report`]: struct.Report.html
 //! [`get_repos()`]: fn.get_repos.html
 //! [`subcommands`]: subcommands/index.html
 
@@ -54,11 +54,13 @@ mod config;
 mod core;
 mod errors;
 mod repo;
+mod report;
 pub mod subcommands; // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
 pub use config::GitGlobalConfig;
-pub use core::{get_repos, GitGlobalResult};
+pub use core::get_repos;
 pub use errors::GitGlobalError;
 pub use errors::Result;
 pub use repo::Repo;
+pub use report::Report;

@@ -55,7 +55,6 @@ git config --global global.ignore .cargo,.vim,Library
 * use `locate .git` if the DB is populated, instead of walking everything
 * make a `Subcommand` trait
 * do concurrency generically, not just for status subcommand
-* rename `GitGlobalResult` so it's not confused with a normal `Result`
 
 ## Release Notes
 
@@ -66,5 +65,6 @@ git config --global global.ignore .cargo,.vim,Library
   * switch from `std::env::home_dir` to `dirs::home_dir`
   * fix bug with scanning directories when nothing is configured to be ignored
     ([#1](https://github.com/peap/git-global/pull/1))
+  * rename `GitGlobalResult` to `Report`
 * 0.1.0 (1/31/17)
   * initial release with the following subcommands: help, info, list, scan, status

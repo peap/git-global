@@ -25,15 +25,15 @@ fn test_list() {
 #[test]
 fn test_scan() {
     utils::with_base_dir_of_three_repos(|config| {
-        let result = scan::execute(config).unwrap();
+        let report = scan::execute(config).unwrap();
         // There's one global message about how many repos were found.
-        assert_eq!(result.messages.len(), 1);
+        assert_eq!(report.messages.len(), 1);
         assert_eq!(
-            result.messages[0],
+            report.messages[0],
             "Found 3 repos. Use `git global list` to show them."
         );
         // The per-repo message lists should be empty.
-        for (_, msg_list) in &result.repo_messages {
+        for (_, msg_list) in &report.repo_messages {
             assert_eq!(msg_list.len(), 0);
         }
     });

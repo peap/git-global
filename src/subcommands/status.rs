@@ -7,9 +7,10 @@ use std::thread;
 use git2;
 
 use config::GitGlobalConfig;
-use core::{get_repos, GitGlobalResult};
+use core::get_repos;
 use errors::Result;
 use repo::Repo;
+use report::Report;
 
 /// Translates a file's status flags to their "short format" representation.
 ///
@@ -78,10 +79,10 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
     let repos = get_repos(&mut config);
     let n_repos = repos.len();
-    let mut result = GitGlobalResult::new(&repos);
+    let mut result = Report::new(&repos);
     result.pad_repo_output();
     // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
     let (tx, rx) = mpsc::channel();

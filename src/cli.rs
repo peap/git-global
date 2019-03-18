@@ -17,7 +17,7 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         .arg(
             Arg::with_name("json")
                 .long("json")
-                .help("Output result in JSON."),
+                .help("Output subcommand results in JSON."),
         )
         .subcommand(
             SubCommand::with_name("info")
@@ -44,7 +44,7 @@ pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
     let config = GitGlobalConfig::new();
-    let result = match matches.subcommand_name() {
+    let report = match matches.subcommand_name() {
         Some("info") => subcommands::info::execute(config),
         Some("list") => subcommands::list::execute(config),
         Some("scan") => subcommands::scan::execute(config),
@@ -53,12 +53,12 @@ pub fn run_from_command_line() -> i32 {
         None => subcommands::status::execute(config),
     };
     let use_json = matches.is_present("json");
-    match result {
-        Ok(res) => {
+    match report {
+        Ok(rep) => {
             if use_json {
-                res.print_json(&mut stdout());
+                rep.print_json(&mut stdout());
             } else {
-                res.print(&mut stdout());
+                rep.print(&mut stdout());
             }
             0
         }
@@ -68,11 +68,9 @@ pub fn run_from_command_line() -> i32 {
                     "error" => true,
                     "message" => format!("{}", err)
                 };
-                writeln!(&mut stderr(), "{:#}", json)
-                    .expect("failed write to STDERR");
+                writeln!(&mut stderr(), "{:#}", json).unwrap();
             } else {
-                writeln!(&mut stderr(), "{}", err)
-                    .expect("failed write to STDERR");
+                writeln!(&mut stderr(), "{}", err).unwrap();
             }
             1
         }

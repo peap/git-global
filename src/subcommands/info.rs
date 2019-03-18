@@ -6,8 +6,9 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 use config::GitGlobalConfig;
-use core::{get_repos, GitGlobalResult};
+use core::get_repos;
 use errors::Result;
+use report::Report;
 
 /// Returns the age of a file in terms of days, hours, minutes, and seconds.
 fn get_age(filename: PathBuf) -> Option<String> {
@@ -30,9 +31,9 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
     let repos = get_repos(&mut config);
-    let mut result = GitGlobalResult::new(&repos);
+    let mut result = Report::new(&repos);
     let version = format!("{}", crate_version!());
     // beginning of underline:   git-global x.x.x
     let mut underline = format!("===========");
