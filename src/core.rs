@@ -4,6 +4,7 @@
 //! and `find_repos()` functions.
 
 use std::collections::HashMap;
+use std::io::Write;
 
 use walkdir::WalkDir;
 
@@ -55,27 +56,27 @@ impl GitGlobalResult {
         }
     }
 
-    /// Writes all result messages to STDOUT, as text.
-    pub fn print(&self) {
+    /// Writes all result messages to the given writer, as text.
+    pub fn print<W: Write>(&self, writer: &mut W) {
         for msg in self.messages.iter() {
-            println!("{}", msg);
+            writeln!(writer, "{}", msg).unwrap();
         }
         for repo in self.repos.iter() {
             let messages = self.repo_messages.get(&repo).unwrap();
             if messages.len() > 0 {
-                println!("{}", repo);
+                writeln!(writer, "{}", repo).unwrap();
                 for line in messages.iter().filter(|l| *l != "") {
-                    println!("{}", line);
+                    writeln!(writer, "{}", line).unwrap();
                 }
                 if self.flag_pad_repo_output {
-                    println!();
+                    writeln!(writer, "").unwrap();
                 }
             }
         }
     }
 
-    /// Writes all result messages to STDOUT, as JSON.
-    pub fn print_json(&self) {
+    /// Writes all result messages to the given writer, as JSON.
+    pub fn print_json<W: Write>(&self, writer: &mut W) {
         let mut json = object! {
             "error" => false,
             "messages" => array![],
@@ -98,7 +99,7 @@ impl GitGlobalResult {
                 }
             }
         }
-        println!("{:#}", json);
+        writeln!(writer, "{:#}", json).unwrap();
     }
 }
 

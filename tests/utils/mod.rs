@@ -35,7 +35,7 @@ where
         repo_path.push(repo_name);
         git2::Repository::init(repo_path).unwrap();
     }
-    let config = GitGlobalConfig{
+    let config = GitGlobalConfig {
         basedir: base_path.clone().to_str().unwrap().to_string(),
         ignored_patterns: vec![],
         cache_file: base_path.clone().join("test-cache-file.txt").to_path_buf(),

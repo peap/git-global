@@ -1,11 +1,10 @@
 //! The command line interface for git-global.
 
-use std::io::{stderr, Write};
+use std::io::{stderr, stdout, Write};
 
 use clap::{App, Arg, SubCommand};
 
 use config::GitGlobalConfig;
-use core::GitGlobalResult;
 use errors::GitGlobalError;
 use subcommands;
 
@@ -18,35 +17,34 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         .arg(
             Arg::with_name("json")
                 .long("json")
-                .help("Output results in JSON."),
+                .help("Output result in JSON."),
         )
         .subcommand(
             SubCommand::with_name("info")
-                .about("show meta-information about git-global"),
+                .about("Shows meta-information about git-global"),
         )
         .subcommand(
-            SubCommand::with_name("list")
-                .about("lists all git repos on your machine [the default]"),
+            SubCommand::with_name("list").about("Lists all known git repos"),
         )
         .subcommand(
             SubCommand::with_name("scan")
-                .about("update cache of git repos on your machine"),
+                .about("Updates cache of known git repos"),
         )
         .subcommand(
             SubCommand::with_name("status")
-                .about("shows status of all git repos"),
+                .about("Shows status of all known git repos [the default]"),
         )
 }
 
 /// Runs the appropriate git-global subcommand based on command line arguments.
 ///
 /// As the effective binary entry point for `git-global`, prints results to
-/// `STDOUT` and returns an exit code.
+/// `STDOUT` (or errors to `STDERR~) and returns an exit code.
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
     let config = GitGlobalConfig::new();
-    let results = match matches.subcommand_name() {
+    let result = match matches.subcommand_name() {
         Some("info") => subcommands::info::execute(config),
         Some("list") => subcommands::list::execute(config),
         Some("scan") => subcommands::scan::execute(config),
@@ -55,32 +53,28 @@ pub fn run_from_command_line() -> i32 {
         None => subcommands::status::execute(config),
     };
     let use_json = matches.is_present("json");
-    match results {
-        Ok(res) => show_results(res, use_json),
-        Err(err) => show_error(err, use_json),
+    match result {
+        Ok(res) => {
+            if use_json {
+                res.print_json(&mut stdout());
+            } else {
+                res.print(&mut stdout());
+            }
+            0
+        }
+        Err(err) => {
+            if use_json {
+                let json = object! {
+                    "error" => true,
+                    "message" => format!("{}", err)
+                };
+                writeln!(&mut stderr(), "{:#}", json)
+                    .expect("failed write to STDERR");
+            } else {
+                writeln!(&mut stderr(), "{}", err)
+                    .expect("failed write to STDERR");
+            }
+            1
+        }
     }
-}
-
-/// Writes results to STDOUT, as either text or JSON, and returns `0`.
-fn show_results(results: GitGlobalResult, use_json: bool) -> i32 {
-    if use_json {
-        results.print_json();
-    } else {
-        results.print();
-    }
-    0
-}
-
-/// Writes errors to STDERR, as either text or JSON, and returns `1`.
-fn show_error(error: GitGlobalError, use_json: bool) -> i32 {
-    if use_json {
-        let json = object! {
-            "error" => true,
-            "message" => format!("{}", error)
-        };
-        writeln!(&mut stderr(), "{:#}", json).expect("failed write to STDERR");
-    } else {
-        writeln!(&mut stderr(), "{}", error).expect("failed write to STDERR");
-    }
-    1
 }
