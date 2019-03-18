@@ -1,18 +1,49 @@
+#[macro_use]
+extern crate clap;
 extern crate git_global;
+extern crate regex;
 
 mod utils;
 
-use git_global::subcommands;
+use std::io::Cursor;
+
+use regex::Regex;
+
+use git_global::{subcommands, Report};
+
+fn report_to_string(report: &Report) -> String {
+    let mut out = Cursor::new(Vec::new());
+    report.print(&mut out);
+    String::from_utf8(out.into_inner()).unwrap()
+}
 
 #[test]
 fn test_info() {
     utils::with_base_dir_of_three_repos(|config| {
+        let basedir = config.basedir.clone();
+        let cache = config.cache_file.clone().to_str().unwrap().to_string();
         let report = subcommands::info::execute(config).unwrap();
-        // There's a series of global messages about git-global itself.
-        assert_eq!(report.messages.len(), 7);
-        // The per-repo message lists should be empty.
-        for (_, msg_list) in &report.repo_messages {
-            assert_eq!(msg_list.len(), 0);
+        let expected = vec![
+            format!(r"^git-global {}$", crate_version!()),
+            format!(r"^============+"),
+            format!(r"^Number of repos: 3$"),
+            format!(r"^Base directory: {}$", basedir),
+            format!(r"^Cache file: {}$", cache),
+            format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
+            format!(r"^Ignored patterns:$"),
+            format!(r"^$"),
+        ];
+        let output = report_to_string(&report);
+        for (i, line) in output.lines().enumerate() {
+            let pattern = &expected[i];
+            let re = Regex::new(pattern).unwrap();
+            assert!(
+                re.is_match(line),
+                "Line {} didn't match; got {}, want {}",
+                i + 1,
+                line,
+                pattern
+            )
         }
     });
 }
@@ -20,14 +51,19 @@ fn test_info() {
 #[test]
 fn test_list() {
     utils::with_base_dir_of_three_repos(|config| {
+        let basedir = config.basedir.clone();
         let report = subcommands::list::execute(config).unwrap();
-        // There are no global messages.
-        assert_eq!(report.messages.len(), 0);
-        // The per-repo message lists should have one empty string each.
-        for (_, msg_list) in &report.repo_messages {
-            assert_eq!(msg_list.len(), 1);
-            assert_eq!(msg_list[0], "");
-        }
+        // There are no global messages; the per-repo messages are simply a list
+        // of the repo paths themselves.
+        assert_eq!(
+            report_to_string(&report),
+            format!(
+                "{0}/a\n\
+                 {0}/b\n\
+                 {0}/c\n",
+                basedir
+            )
+        );
     });
 }
 
@@ -35,16 +71,11 @@ fn test_list() {
 fn test_scan() {
     utils::with_base_dir_of_three_repos(|config| {
         let report = subcommands::scan::execute(config).unwrap();
-        // There's one global message about how many repos were found.
-        assert_eq!(report.messages.len(), 1);
+        // There is one global message about the three repos we found.
         assert_eq!(
-            report.messages[0],
-            "Found 3 repos. Use `git global list` to show them."
+            report_to_string(&report),
+            "Found 3 repos. Use `git global list` to show them.\n"
         );
-        // The per-repo message lists should be empty.
-        for (_, msg_list) in &report.repo_messages {
-            assert_eq!(msg_list.len(), 0);
-        }
     });
 }
 
@@ -53,10 +84,6 @@ fn test_status() {
     utils::with_base_dir_of_three_repos(|config| {
         let report = subcommands::status::execute(config).unwrap();
         // There are no global messages.
-        assert_eq!(report.messages.len(), 0);
-        // There are no per-repo messages, because all the repos are clean.
-        for (_, msg_list) in &report.repo_messages {
-            assert_eq!(msg_list.len(), 0);
-        }
+        assert_eq!(report_to_string(&report), "");
     });
 }

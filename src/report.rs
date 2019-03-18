@@ -9,8 +9,8 @@ use repo::Repo;
 ///
 /// Contains overall messages and per-repo messages.
 pub struct Report {
-    pub messages: Vec<String>,
-    pub repo_messages: HashMap<Repo, Vec<String>>,
+    messages: Vec<String>,
+    repo_messages: HashMap<Repo, Vec<String>>,
     repos: Vec<Repo>,
     pad_repo_output: bool,
 }
