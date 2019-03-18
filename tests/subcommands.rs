@@ -6,8 +6,9 @@ extern crate regex;
 mod utils;
 
 use std::io::Cursor;
+use std::path::PathBuf;
 
-use regex::Regex;
+use regex::{escape, Regex};
 
 use git_global::{subcommands, Report};
 
@@ -27,8 +28,8 @@ fn test_info() {
             format!(r"^git-global {}$", crate_version!()),
             format!(r"^============+"),
             format!(r"^Number of repos: 3$"),
-            format!(r"^Base directory: {}$", basedir),
-            format!(r"^Cache file: {}$", cache),
+            format!(r"^Base directory: {}$", escape(&basedir)),
+            format!(r"^Cache file: {}$", escape(&cache)),
             format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
             format!(r"^Ignored patterns:$"),
             format!(r"^$"),
@@ -55,15 +56,15 @@ fn test_list() {
         let report = subcommands::list::execute(config).unwrap();
         // There are no global messages; the per-repo messages are simply a list
         // of the repo paths themselves.
-        assert_eq!(
-            report_to_string(&report),
-            format!(
-                "{0}/a\n\
-                 {0}/b\n\
-                 {0}/c\n",
-                basedir
-            )
-        );
+        let expected = vec![
+            PathBuf::from(&basedir).join("a"),
+            PathBuf::from(&basedir).join("b"),
+            PathBuf::from(&basedir).join("c"),
+        ];
+        let output = report_to_string(&report);
+        for (i, line) in output.lines().enumerate() {
+            assert_eq!(expected[i].to_str().unwrap(), line);
+        }
     });
 }
 
