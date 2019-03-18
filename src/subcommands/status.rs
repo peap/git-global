@@ -16,27 +16,27 @@ use report::Report;
 /// Follows an example in the git2-rs crate's `examples/status.rs`.
 fn get_short_format_status(path: &str, status: git2::Status) -> String {
     let mut istatus = match status {
-        s if s.contains(git2::STATUS_INDEX_NEW) => 'A',
-        s if s.contains(git2::STATUS_INDEX_MODIFIED) => 'M',
-        s if s.contains(git2::STATUS_INDEX_DELETED) => 'D',
-        s if s.contains(git2::STATUS_INDEX_RENAMED) => 'R',
-        s if s.contains(git2::STATUS_INDEX_TYPECHANGE) => 'T',
+        s if s.contains(git2::Status::INDEX_NEW) => 'A',
+        s if s.contains(git2::Status::INDEX_MODIFIED) => 'M',
+        s if s.contains(git2::Status::INDEX_DELETED) => 'D',
+        s if s.contains(git2::Status::INDEX_RENAMED) => 'R',
+        s if s.contains(git2::Status::INDEX_TYPECHANGE) => 'T',
         _ => ' ',
     };
     let mut wstatus = match status {
-        s if s.contains(git2::STATUS_WT_NEW) => {
+        s if s.contains(git2::Status::WT_NEW) => {
             if istatus == ' ' {
                 istatus = '?';
             }
             '?'
         }
-        s if s.contains(git2::STATUS_WT_MODIFIED) => 'M',
-        s if s.contains(git2::STATUS_WT_DELETED) => 'D',
-        s if s.contains(git2::STATUS_WT_RENAMED) => 'R',
-        s if s.contains(git2::STATUS_WT_TYPECHANGE) => 'T',
+        s if s.contains(git2::Status::WT_MODIFIED) => 'M',
+        s if s.contains(git2::Status::WT_DELETED) => 'D',
+        s if s.contains(git2::Status::WT_RENAMED) => 'R',
+        s if s.contains(git2::Status::WT_TYPECHANGE) => 'T',
         _ => ' ',
     };
-    if status.contains(git2::STATUS_IGNORED) {
+    if status.contains(git2::Status::IGNORED) {
         istatus = '!';
         wstatus = '!';
     }

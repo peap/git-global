@@ -31,5 +31,5 @@ walkdir = "2"
 tempdir = "0.3"
 
 [dependencies.git2]
-version = "0.6"
+version = "0.8"
 default-features = false  # don't want SSH/HTTPS/Curl
