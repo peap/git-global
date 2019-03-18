@@ -63,16 +63,16 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
-* 0.2.0 (work-in-progress)
+* 0.2.0 (2019-03-18)
   * Expand documentation and package metadata.
   * Update and change several dependencies.
   * Add some tests.
-  * Fix bug with scanning directories when nothing is configured to be ignored
-    ([#1](https://github.com/peap/git-global/pull/1)).
   * Several public API changes, such as:
     * Rename `GitGlobalConfig` to `Config`.
     * Rename `GitGlobalResult` to `Report`.
     * Move `get_repos` `find_repos`, and `cache_repos` functions to `Config`.
     * Split the `core` module into `config`, `repo`, and `report`.
-* 0.1.0 (1/31/17)
+  * Merge bug fix for scanning directories when nothing is configured to be
+    ignored ([#1](https://github.com/peap/git-global/pull/1)).
+* 0.1.0 (2017-01-31)
   * Initial release with these subcommands: help, info, list, scan, status.
