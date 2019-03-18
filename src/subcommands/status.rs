@@ -82,7 +82,7 @@ pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
     let n_repos = repos.len();
     let mut report = Report::new(&repos);
     report.pad_repo_output();
-    // TOOD: limit number of threads, perhaps with mpsc::sync_channel(n)?
+    // TODO: limit number of threads, perhaps with mpsc::sync_channel(n)?
     let (tx, rx) = mpsc::channel();
     for repo in repos {
         let tx = tx.clone();
