@@ -14,9 +14,9 @@ use repo::Repo;
 ///
 /// Contains overall messages, per-repo messages, and a list of repos.
 pub struct GitGlobalResult {
-    messages: Vec<String>,
+    pub messages: Vec<String>,
     repos: Vec<Repo>,
-    repo_messages: HashMap<Repo, Vec<String>>,
+    pub repo_messages: HashMap<Repo, Vec<String>>,
     flag_pad_repo_output: bool,
 }
 

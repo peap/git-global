@@ -3,7 +3,6 @@ extern crate git_global;
 mod utils;
 
 use git_global::subcommands::scan;
-use git_global::GitGlobalConfig;
 
 #[test]
 #[ignore]
@@ -24,13 +23,19 @@ fn test_list() {
 }
 
 #[test]
-#[ignore]
 fn test_scan() {
-    utils::with_base_dir_of_three_repos(|ref _path| {
-        // TODO: inject a GitGlobalConfig that takes `path` as its base directory
-        let config = GitGlobalConfig::new();
-        let result = scan::get_results(config);
-        assert!(result.is_ok());
+    utils::with_base_dir_of_three_repos(|config| {
+        let result = scan::get_results(config).unwrap();
+        // There's one global message about how many repos were found.
+        assert_eq!(result.messages.len(), 1);
+        assert_eq!(
+            result.messages[0],
+            "Found 3 repos. Use `git global list` to show them."
+        );
+        // The per-repo message lists should be empty.
+        for (_, msg_list) in &result.repo_messages {
+            assert_eq!(msg_list.len(), 0);
+        }
     });
 }
 
