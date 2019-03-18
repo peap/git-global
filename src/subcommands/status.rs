@@ -78,7 +78,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
     let repos = get_repos(&mut config);
     let n_repos = repos.len();
     let mut result = GitGlobalResult::new(&repos);

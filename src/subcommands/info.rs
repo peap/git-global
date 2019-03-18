@@ -30,7 +30,7 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
     let repos = get_repos(&mut config);
     let mut result = GitGlobalResult::new(&repos);
     let version = format!("{}", crate_version!());

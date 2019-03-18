@@ -5,7 +5,7 @@ use core::{get_repos, GitGlobalResult};
 use errors::Result;
 
 /// Forces the display of each repo path, without any extra output.
-pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
     let repos = get_repos(&mut config);
     let mut result = GitGlobalResult::new(&repos);
     for repo in repos.iter() {

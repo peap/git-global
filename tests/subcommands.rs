@@ -25,7 +25,7 @@ fn test_list() {
 #[test]
 fn test_scan() {
     utils::with_base_dir_of_three_repos(|config| {
-        let result = scan::get_results(config).unwrap();
+        let result = scan::execute(config).unwrap();
         // There's one global message about how many repos were found.
         assert_eq!(result.messages.len(), 1);
         assert_eq!(

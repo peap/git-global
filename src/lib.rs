@@ -25,8 +25,8 @@
 //!
 //! A [`GitGlobalResult`] result contains messages added by a subcommand, either
 //! about the overall process or about a specific repo, as well as a list of
-//! repos. All subcommands expose a `get_results()` function that returns a
-//! `GitGlobalResult`.
+//! repos. All subcommands expose an `execute()` function that takes ownership
+//! of a `GitGlobalConfig` struct and returns a `GitGlobalResult`.
 //!
 //! The [`get_repos()`] function returns the list of known repos, performing a
 //! scan if necessary.

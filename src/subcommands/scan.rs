@@ -15,7 +15,7 @@ use core::{cache_repos, find_repos, GitGlobalResult};
 use errors::Result;
 
 /// Caches the results of `find_repos()` and says how many were found.
-pub fn get_results(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
+pub fn execute(mut config: GitGlobalConfig) -> Result<GitGlobalResult> {
     let repos = find_repos(&mut config);
     cache_repos(&mut config, &repos);
     let mut result = GitGlobalResult::new(&repos);

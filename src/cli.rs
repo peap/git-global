@@ -47,12 +47,12 @@ pub fn run_from_command_line() -> i32 {
     let matches = clap_app.get_matches();
     let config = GitGlobalConfig::new();
     let results = match matches.subcommand_name() {
-        Some("info") => subcommands::info::get_results(config),
-        Some("list") => subcommands::list::get_results(config),
-        Some("scan") => subcommands::scan::get_results(config),
-        Some("status") => subcommands::status::get_results(config),
+        Some("info") => subcommands::info::execute(config),
+        Some("list") => subcommands::list::execute(config),
+        Some("scan") => subcommands::scan::execute(config),
+        Some("status") => subcommands::status::execute(config),
         Some(cmd) => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
-        None => subcommands::status::get_results(config),
+        None => subcommands::status::execute(config),
     };
     let use_json = matches.is_present("json");
     match results {
