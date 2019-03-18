@@ -7,15 +7,16 @@ use repo::Repo;
 
 /// A report containing the results of a git-global subcommand.
 ///
-/// Contains overall messages, per-repo messages, and a list of repos.
+/// Contains overall messages and per-repo messages.
 pub struct Report {
     pub messages: Vec<String>,
-    repos: Vec<Repo>,
     pub repo_messages: HashMap<Repo, Vec<String>>,
+    repos: Vec<Repo>,
     pad_repo_output: bool,
 }
 
 impl Report {
+    /// Create a new `Report` for the given `Repo`s..
     pub fn new(repos: &Vec<Repo>) -> Report {
         let mut repo_messages: HashMap<Repo, Vec<String>> = HashMap::new();
         for repo in repos {
@@ -29,10 +30,10 @@ impl Report {
         }
     }
 
-    /// Declares desire to separate output when showing per-repo messages.
+    /// Declares the desire to separate output when showing per-repo messages.
     ///
     /// Sets flag that indicates a blank line should be inserted between
-    /// messages for different repos when printing results output.
+    /// messages for different repos when printing per-repo output.
     pub fn pad_repo_output(&mut self) {
         self.pad_repo_output = true;
     }
@@ -42,7 +43,7 @@ impl Report {
         self.messages.push(message);
     }
 
-    /// Adds a message that applies to a particular repo.
+    /// Adds a message that applies to the given repo.
     pub fn add_repo_message(&mut self, repo: &Repo, data_line: String) {
         match self.repo_messages.get_mut(&repo) {
             Some(item) => item.push(data_line),

@@ -38,7 +38,7 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
 /// Runs the appropriate git-global subcommand based on command line arguments.
 ///
 /// As the effective binary entry point for `git-global`, prints results to
-/// `STDOUT` (or errors to `STDERR~) and returns an exit code.
+/// `STDOUT` (or errors to `STDERR`) and returns an exit code.
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();

@@ -8,6 +8,7 @@ use config::Config;
 use errors::{GitGlobalError, Result};
 use report::Report;
 
+/// Run the subcommand matching the provided `str`, returning a `Report`.
 pub fn run(command: &str, config: Config) -> Result<Report> {
     match command {
         "info" => info::execute(config),

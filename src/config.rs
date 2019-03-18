@@ -26,17 +26,27 @@ const SETTING_IGNORED: &'static str = "global.ignore";
 
 /// A container for git-global configuration options.
 pub struct Config {
+    /// The base directory to walk when searching for git repositories.
     pub basedir: String,
+
+    /// Path patterns to ignore when searching for git repositories.
     pub ignored_patterns: Vec<String>,
+
+    /// Path a cache file for git-global's usage.
     pub cache_file: PathBuf,
 }
 
 impl Config {
+    /// Create a new `Config` with the default behavior, first checking global
+    /// git config options in ~/.gitconfig, then using defaults:
+    /// * `basedir`: `global.basedir`, or user's home directory
+    /// * `ignored_patterns`: `global.ignore`, or nothing
+    /// * `cache_file`: `repos.txt` in the user's XDG cache directory
     pub fn new() -> Config {
         let home_dir = home_dir()
             .expect("Could not determine home directory.")
             .to_str()
-            .expect("Could not convert home directory path to string.")
+            .expect("Could not convert home directory path to str.")
             .to_string();
         let (basedir, patterns) = match git2::Config::open_default() {
             Ok(config) => (
@@ -75,7 +85,7 @@ impl Config {
     }
 
     /// Clears the cache of known git repos, forcing a re-scan on the next
-    /// get_repos() call.
+    /// `get_repos()` call.
     pub fn clear_cache(&mut self) {
         if self.has_cache() {
             remove_file(&self.cache_file)
@@ -134,7 +144,7 @@ impl Config {
     }
 
     /// Writes the given repo paths to the cache file.
-    pub fn cache_repos(&self, repos: &Vec<Repo>) {
+    fn cache_repos(&self, repos: &Vec<Repo>) {
         if !self.cache_file.as_path().exists() {
             // Try to create the cache directory if the cache *file* doesn't
             // exist; app_dir() handles an existing directory just fine.
@@ -154,7 +164,7 @@ impl Config {
     }
 
     /// Returns the list of repos found in the cache file.
-    pub fn get_cached_repos(&self) -> Vec<Repo> {
+    fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
         if self.cache_file.as_path().exists() {
             let f = File::open(&self.cache_file)
