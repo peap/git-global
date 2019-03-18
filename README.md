@@ -65,7 +65,8 @@ git config --global global.ignore .cargo,.vim,Library
   * fix bug with scanning directories when nothing is configured to be ignored
     ([#1](https://github.com/peap/git-global/pull/1))
   * several public API changes, such as:
-    * moving `get_repos` function to `GitGlobalConfig.get_repos`
+    * rename `GitGlobalConfig` to `Config`
+    * moving `get_repos` function to `Config.get_repos`
     * renaming `GitGlobalResult` to `Report`
     * splitting the `core` module into `config`, `repo`, and `report`
 * 0.1.0 (1/31/17)

@@ -1,9 +1,9 @@
 //! Configuration of git-global.
 //!
-//! Exports the `GitGlobalConfig` struct, which defines the base path for
-//! finding git repos on the machine, path patterns to ignore when scanning for
-//! repos, and the location of a cache file to prevent scanning the filesystem
-//! every time the list of known repos is needed.
+//! Exports the `Config` struct, which defines the base path for finding git
+//! repos on the machine, path patterns to ignore when scanning for repos, and
+//! the location of a cache file to prevent scanning the filesystem every time
+//! the list of known repos is needed.
 
 use std::fs::{remove_file, File};
 use std::io::{BufRead, BufReader, Write};
@@ -25,14 +25,14 @@ const SETTING_BASEDIR: &'static str = "global.basedir";
 const SETTING_IGNORED: &'static str = "global.ignore";
 
 /// A container for git-global configuration options.
-pub struct GitGlobalConfig {
+pub struct Config {
     pub basedir: String,
     pub ignored_patterns: Vec<String>,
     pub cache_file: PathBuf,
 }
 
-impl GitGlobalConfig {
-    pub fn new() -> GitGlobalConfig {
+impl Config {
+    pub fn new() -> Config {
         let home_dir = home_dir()
             .expect("Could not determine home directory.")
             .to_str()
@@ -58,7 +58,7 @@ impl GitGlobalConfig {
                 }
                 Err(_) => panic!("TODO: work without XDG"),
             };
-        GitGlobalConfig {
+        Config {
             basedir: basedir,
             ignored_patterns: patterns,
             cache_file: cache_file,

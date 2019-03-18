@@ -6,7 +6,7 @@ use std::thread;
 
 use git2;
 
-use config::GitGlobalConfig;
+use config::Config;
 use errors::Result;
 use repo::Repo;
 use report::Report;
@@ -77,7 +77,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 }
 
 /// Gathers `git status -s` for all known repos.
-pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
+pub fn execute(mut config: Config) -> Result<Report> {
     let repos = config.get_repos();
     let n_repos = repos.len();
     let mut report = Report::new(&repos);

@@ -4,11 +4,11 @@ pub mod list;
 pub mod scan;
 pub mod status;
 
-use config::GitGlobalConfig;
+use config::Config;
 use errors::{GitGlobalError, Result};
 use report::Report;
 
-pub fn run(command: &str, config: GitGlobalConfig) -> Result<Report> {
+pub fn run(command: &str, config: Config) -> Result<Report> {
     match command {
         "info" => info::execute(config),
         "list" => list::execute(config),

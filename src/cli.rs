@@ -4,7 +4,7 @@ use std::io::{stderr, stdout, Write};
 
 use clap::{App, Arg, SubCommand};
 
-use config::GitGlobalConfig;
+use config::Config;
 use subcommands;
 
 /// Returns the definitive clap::App instance for git-global.
@@ -42,7 +42,7 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
-    let config = GitGlobalConfig::new();
+    let config = Config::new();
     let report = match matches.subcommand_name() {
         Some(cmd) => subcommands::run(cmd, config),
         None => subcommands::run("status", config),

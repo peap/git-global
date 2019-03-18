@@ -10,12 +10,12 @@
 //! The `scan` subcommand caches the list of git repos paths it finds, and can
 //! be rerun at any time to refresh the list.
 
-use config::GitGlobalConfig;
+use config::Config;
 use errors::Result;
 use report::Report;
 
 /// Clears the cache, forces a rescan, and says how many repos were found.
-pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
+pub fn execute(mut config: Config) -> Result<Report> {
     config.clear_cache();
     let repos = config.get_repos();
     let mut report = Report::new(&repos);

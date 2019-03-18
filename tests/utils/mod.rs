@@ -4,7 +4,7 @@ extern crate tempdir;
 
 use std::path::PathBuf;
 
-use self::git_global::{GitGlobalConfig, Repo};
+use self::git_global::{Config, Repo};
 
 /// Initialize an empty git repo in a temporary directory, then run a closure
 /// that takes that Repo instance.
@@ -21,12 +21,12 @@ where
 }
 
 /// Create a temporary directory with three empty git repos within, a, b, and c,
-/// then run a closure that takes a GitGlobalConfig initialized for that
-/// temporary directory.
+/// then run a closure that takes a Config initialized for that temporary
+/// directory.
 #[allow(dead_code)]
 pub fn with_base_dir_of_three_repos<T>(test: T) -> ()
 where
-    T: FnOnce(GitGlobalConfig) -> (),
+    T: FnOnce(Config) -> (),
 {
     let tempdir = tempdir::TempDir::new("git-global-test").unwrap();
     let base_path = tempdir.path();
@@ -35,7 +35,7 @@ where
         repo_path.push(repo_name);
         git2::Repository::init(repo_path).unwrap();
     }
-    let config = GitGlobalConfig {
+    let config = Config {
         basedir: base_path.clone().to_str().unwrap().to_string(),
         ignored_patterns: vec![],
         cache_file: base_path.clone().join("test-cache-file.txt").to_path_buf(),

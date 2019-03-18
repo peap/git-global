@@ -5,7 +5,7 @@ use chrono::Duration;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use config::GitGlobalConfig;
+use config::Config;
 use errors::Result;
 use report::Report;
 
@@ -30,7 +30,7 @@ fn get_age(filename: PathBuf) -> Option<String> {
 }
 
 /// Gathers metadata about the git-global installation.
-pub fn execute(mut config: GitGlobalConfig) -> Result<Report> {
+pub fn execute(mut config: Config) -> Result<Report> {
     let repos = config.get_repos();
     let mut report = Report::new(&repos);
     let version = format!("{}", crate_version!());

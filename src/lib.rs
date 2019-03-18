@@ -19,19 +19,19 @@
 //! The [`Repo`] struct is a git repository that is identified by the full path
 //! to its base directory (i.e., not its `.git` directory).
 //!
-//! The [`GitGlobalConfig`] struct holds a user's git-global configuration
-//! information, which merges some default values with values in the `[global]`
-//! section of the user's global `.gitconfig` file. The [`get_repos()`] method
-//! returns the list of known repos, performing a scan if necessary.
+//! The [`Config`] struct holds a user's git-global configuration information,
+//! which merges some default values with values in the `[global]` section of
+//! the user's global `.gitconfig` file. The [`get_repos()`] method returns the
+//! list of known repos, performing a scan if necessary.
 //!
 //! A [`Report`] contains results messages added by a subcommand, either about
 //! the overall process or about a specific repo, as well as a list of repos.
 //! All subcommands expose an `execute()` function that takes ownership of a
-//! `GitGlobalConfig` struct and returns a `Report`.
+//! `Config` struct and returns a `Report`.
 //!
 //! All git-global subcommands are implemented in the [`subcommands`] module.
 //!
-//! [`GitGlobalConfig`]: struct.GitGlobalConfig.html
+//! [`Config`]: struct.Config.html
 //! [`Repo`]: struct.Repo.html
 //! [`Report`]: struct.Report.html
 //! [`subcommands`]: subcommands/index.html
@@ -54,7 +54,7 @@ mod report;
 pub mod subcommands; // Using `pub mod` so we see the docs.
 
 pub use cli::run_from_command_line;
-pub use config::GitGlobalConfig;
+pub use config::Config;
 pub use errors::{GitGlobalError, Result};
 pub use repo::Repo;
 pub use report::Report;
