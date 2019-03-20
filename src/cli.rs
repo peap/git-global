@@ -18,21 +18,9 @@ fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
                 .long("json")
                 .help("Output subcommand results in JSON."),
         )
-        .subcommand(
-            SubCommand::with_name("info")
-                .about("Shows meta-information about git-global"),
-        )
-        .subcommand(
-            SubCommand::with_name("list").about("Lists all known git repos"),
-        )
-        .subcommand(
-            SubCommand::with_name("scan")
-                .about("Updates cache of known git repos"),
-        )
-        .subcommand(
-            SubCommand::with_name("status")
-                .about("Shows status of all known git repos [the default]"),
-        )
+        .subcommands(subcommands::get_subcommands().iter().map(
+            |(ref cmd, ref desc)| SubCommand::with_name(*cmd).about(*desc),
+        ))
 }
 
 /// Runs the appropriate git-global subcommand based on command line arguments.
