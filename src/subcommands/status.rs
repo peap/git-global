@@ -49,7 +49,7 @@ fn get_short_format_status(path: &str, status: git2::Status) -> String {
 }
 
 /// Returns "short format" output for the given repo.
-fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
+fn get_status_lines(repo: Arc<Repo>, include_untracked: bool) -> Vec<String> {
     let git2_repo = match repo.as_git2_repo() {
         None => {
             writeln!(
@@ -65,7 +65,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
     };
     let mut opts = git2::StatusOptions::new();
     opts.show(git2::StatusShow::IndexAndWorkdir)
-        .include_untracked(true)
+        .include_untracked(include_untracked)
         .include_ignored(false);
     let statuses = git2_repo
         .statuses(Some(&mut opts))
@@ -83,6 +83,7 @@ fn get_status_lines(repo: Arc<Repo>) -> Vec<String> {
 
 /// Gathers `git status -s` for all known repos.
 pub fn execute(mut config: Config) -> Result<Report> {
+    let include_untracked = config.show_untracked;
     let repos = config.get_repos();
     let n_repos = repos.len();
     let mut report = Report::new(&repos);
@@ -94,7 +95,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
         let repo = Arc::new(repo);
         thread::spawn(move || {
             let path = repo.path();
-            let lines = get_status_lines(repo);
+            let lines = get_status_lines(repo, include_untracked);
             tx.send((path, lines)).unwrap();
         });
     }

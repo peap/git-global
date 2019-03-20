@@ -36,6 +36,17 @@ To add patterns to exclude while walking directories:
 git config --global global.ignore .cargo,.vim,Library
 ```
 
+The full list of configuration options supported in the `global` section of
+`.gitconfig` is:
+
+* `basedir`: The root directory for repo discovery (default: `$HOME`)
+* `ignore`: Comma-separated list of patterns to exclude while walking
+  directories (default: none)
+* `default-cmd`: The default subcommand to run if unspecified, i.e., when
+  running `git global` (default: `status`)
+* `show-untracked`: Whether to include untracked files in output (default:
+  `true`)
+
 ## Ideas
 
 The following are some ideas I've had about future subcommands and features:
@@ -63,6 +74,9 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
+* 0.2.1 (work-in-progress)
+  * Add `default-cmd` config option to change the default subcommand.
+  * Add `show-untracked` config option to show/ignore untracked files.
 * 0.2.0 (2019-03-18)
   * Include untracked files in status output.
   * Expand documentation and package metadata.

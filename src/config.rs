@@ -1,9 +1,8 @@
 //! Configuration of git-global.
 //!
 //! Exports the `Config` struct, which defines the base path for finding git
-//! repos on the machine, path patterns to ignore when scanning for repos, and
-//! the location of a cache file to prevent scanning the filesystem every time
-//! the list of known repos is needed.
+//! repos on the machine, path patterns to ignore when scanning for repos, the
+//! location of a cache file, and other config options for running git-global.
 
 use std::fs::{remove_file, File};
 use std::io::{BufRead, BufReader, Write};
@@ -21,45 +20,55 @@ const APP: AppInfo = AppInfo {
     author: "peap",
 };
 const CACHE_FILE: &'static str = "repos.txt";
+
+const DEFAULT_CMD: &'static str = "status";
+const DEFAULT_SHOW_UNTRACKED: bool = true;
+
 const SETTING_BASEDIR: &'static str = "global.basedir";
-const SETTING_IGNORED: &'static str = "global.ignore";
+const SETTING_IGNORE: &'static str = "global.ignore";
+const SETTING_DEFAULT_CMD: &'static str = "global.default-cmd";
+const SETTING_SHOW_UNTRACKED: &'static str = "global.show-untracked";
 
 /// A container for git-global configuration options.
 pub struct Config {
     /// The base directory to walk when searching for git repositories.
+    ///
+    /// Default: $HOME.
     pub basedir: String,
 
     /// Path patterns to ignore when searching for git repositories.
+    ///
+    /// Default: none
     pub ignored_patterns: Vec<String>,
 
+    /// The git-global subcommand to run when unspecified.
+    ///
+    /// Default: `status`
+    pub default_cmd: String,
+
+    /// Whether to show untracked files in output.
+    ///
+    /// Default: true
+    pub show_untracked: bool,
+
     /// Path a cache file for git-global's usage.
+    ///
+    /// Default: `repos.txt` in the user's XDG cache directory.
     pub cache_file: PathBuf,
 }
 
 impl Config {
     /// Create a new `Config` with the default behavior, first checking global
     /// git config options in ~/.gitconfig, then using defaults:
-    /// * `basedir`: `global.basedir`, or user's home directory
-    /// * `ignored_patterns`: `global.ignore`, or nothing
-    /// * `cache_file`: `repos.txt` in the user's XDG cache directory
     pub fn new() -> Config {
+        // Find the user's home directory, in case we need to fall back to using
+        // it.
         let home_dir = home_dir()
             .expect("Could not determine home directory.")
             .to_str()
             .expect("Could not convert home directory path to str.")
             .to_string();
-        let (basedir, patterns) = match git2::Config::open_default() {
-            Ok(config) => (
-                config.get_string(SETTING_BASEDIR).unwrap_or(home_dir),
-                config
-                    .get_string(SETTING_IGNORED)
-                    .unwrap_or(String::new())
-                    .split(",")
-                    .map(|p| p.trim().to_string())
-                    .collect(),
-            ),
-            Err(_) => (home_dir, Vec::new()),
-        };
+        // Set the options that aren't user-configurable.
         let cache_file =
             match get_app_dir(AppDataType::UserCache, &APP, "cache") {
                 Ok(mut dir) => {
@@ -68,10 +77,37 @@ impl Config {
                 }
                 Err(_) => panic!("TODO: work without XDG"),
             };
-        Config {
-            basedir: basedir,
-            ignored_patterns: patterns,
-            cache_file: cache_file,
+        // Try to read user's Git configuration and return a Config object.
+        match git2::Config::open_default() {
+            Ok(cfg) => {
+                (Config {
+                    basedir: cfg
+                        .get_string(SETTING_BASEDIR)
+                        .unwrap_or(home_dir),
+                    ignored_patterns: cfg
+                        .get_string(SETTING_IGNORE)
+                        .unwrap_or(String::new())
+                        .split(",")
+                        .map(|p| p.trim().to_string())
+                        .collect(),
+                    default_cmd: cfg
+                        .get_string(SETTING_DEFAULT_CMD)
+                        .unwrap_or(String::from(DEFAULT_CMD)),
+                    show_untracked: cfg
+                        .get_bool(SETTING_SHOW_UNTRACKED)
+                        .unwrap_or(DEFAULT_SHOW_UNTRACKED),
+                    cache_file: cache_file,
+                })
+            }
+            Err(_) => {
+                (Config {
+                    basedir: home_dir,
+                    ignored_patterns: vec![],
+                    default_cmd: String::from(DEFAULT_CMD),
+                    show_untracked: DEFAULT_SHOW_UNTRACKED,
+                    cache_file: cache_file,
+                })
+            }
         }
     }
 

@@ -38,6 +38,8 @@ where
     let config = Config {
         basedir: base_path.clone().to_str().unwrap().to_string(),
         ignored_patterns: vec![],
+        default_cmd: String::from("status"),
+        show_untracked: true,
         cache_file: base_path.clone().join("test-cache-file.txt").to_path_buf(),
     };
     test(config);
