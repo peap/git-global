@@ -36,7 +36,7 @@ where
         git2::Repository::init(repo_path).unwrap();
     }
     let config = Config {
-        basedir: base_path.clone().to_str().unwrap().to_string(),
+        basedir: base_path.to_path_buf(),
         ignored_patterns: vec![],
         default_cmd: String::from("status"),
         show_untracked: true,

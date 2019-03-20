@@ -22,6 +22,7 @@ impl Repo {
     pub fn as_git2_repo(&self) -> Option<git2::Repository> {
         git2::Repository::open(&self.path).ok()
     }
+
     /// Returns the full path to the repo as a `String`.
     pub fn path(&self) -> String {
         self.path.to_str().unwrap().to_string()

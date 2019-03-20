@@ -28,7 +28,7 @@ fn test_info() {
             format!(r"^git-global {}$", crate_version!()),
             format!(r"^============+"),
             format!(r"^Number of repos: 3$"),
-            format!(r"^Base directory: {}$", escape(&basedir)),
+            format!(r"^Base directory: {}$", escape(basedir.to_str().unwrap())),
             format!(r"^Cache file: {}$", escape(&cache)),
             format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
             format!(r"^Ignored patterns:$"),

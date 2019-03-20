@@ -34,7 +34,7 @@ pub struct Config {
     /// The base directory to walk when searching for git repositories.
     ///
     /// Default: $HOME.
-    pub basedir: String,
+    pub basedir: PathBuf,
 
     /// Path patterns to ignore when searching for git repositories.
     ///
@@ -61,13 +61,8 @@ impl Config {
     /// Create a new `Config` with the default behavior, first checking global
     /// git config options in ~/.gitconfig, then using defaults:
     pub fn new() -> Config {
-        // Find the user's home directory, in case we need to fall back to using
-        // it.
-        let home_dir = home_dir()
-            .expect("Could not determine home directory.")
-            .to_str()
-            .expect("Could not convert home directory path to str.")
-            .to_string();
+        // Find the user's home directory.
+        let homedir = home_dir().expect("Could not determine home directory.");
         // Set the options that aren't user-configurable.
         let cache_file =
             match get_app_dir(AppDataType::UserCache, &APP, "cache") {
@@ -81,9 +76,7 @@ impl Config {
         match git2::Config::open_default() {
             Ok(cfg) => {
                 (Config {
-                    basedir: cfg
-                        .get_string(SETTING_BASEDIR)
-                        .unwrap_or(home_dir),
+                    basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
                     ignored_patterns: cfg
                         .get_string(SETTING_IGNORE)
                         .unwrap_or(String::new())
@@ -100,8 +93,9 @@ impl Config {
                 })
             }
             Err(_) => {
+                // Build the default configuration.
                 (Config {
-                    basedir: home_dir,
+                    basedir: homedir,
                     ignored_patterns: vec![],
                     default_cmd: String::from(DEFAULT_CMD),
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
@@ -142,12 +136,11 @@ impl Config {
     /// Walks the configured base directory, looking for git repos.
     fn find_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
-        let basedir = &self.basedir;
         println!(
             "Scanning for git repos under {}; this may take a while...",
-            basedir
+            self.basedir.display()
         );
-        for entry in WalkDir::new(basedir)
+        for entry in WalkDir::new(&self.basedir)
             .into_iter()
             .filter_entry(|e| self.filter(e))
         {
@@ -176,7 +169,7 @@ impl Config {
 
     /// Returns boolean indicating if the cache file exists.
     fn has_cache(&self) -> bool {
-        self.cache_file.as_path().exists()
+        self.cache_file.exists()
     }
 
     /// Writes the given repo paths to the cache file.
@@ -202,7 +195,7 @@ impl Config {
     /// Returns the list of repos found in the cache file.
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
-        if self.cache_file.as_path().exists() {
+        if self.cache_file.exists() {
             let f = File::open(&self.cache_file)
                 .expect("Could not open cache file.");
             let reader = BufReader::new(f);
