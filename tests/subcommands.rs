@@ -32,6 +32,8 @@ fn test_info() {
             format!(r"^Cache file: {}$", escape(&cache)),
             format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
             format!(r"^Ignored patterns:$"),
+            format!(r"^Default command: status$"),
+            format!(r"^Show untracked: true$"),
             format!(r"^$"),
         ];
         let output = report_to_string(&report);

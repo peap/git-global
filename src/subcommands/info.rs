@@ -51,5 +51,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
     for pat in config.ignored_patterns.iter() {
         report.add_message(format!("  {}", pat));
     }
+    report.add_message(format!("Default command: {}", config.default_cmd));
+    report.add_message(format!("Show untracked: {}", config.show_untracked));
     Ok(report)
 }
