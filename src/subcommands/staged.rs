@@ -1,5 +1,5 @@
-//! The `status` subcommand: shows `git status -s` for all known repos with any
-//! changes to the index or working directory.
+//! The `staged` subcommand: shows `git status -s` for staged changes in all
+//! known repos with such changes.
 
 use std::sync::{mpsc, Arc};
 use std::thread;
@@ -11,7 +11,7 @@ use errors::Result;
 use repo::Repo;
 use report::Report;
 
-/// Runs the `status` subcommand.
+/// Runs the `staged` subcommand.
 pub fn execute(mut config: Config) -> Result<Report> {
     let include_untracked = config.show_untracked;
     let repos = config.get_repos();
@@ -27,7 +27,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
             let path = repo.path();
             let mut status_opts = git2::StatusOptions::new();
             status_opts
-                .show(git2::StatusShow::IndexAndWorkdir)
+                .show(git2::StatusShow::Index)
                 .include_untracked(include_untracked)
                 .include_ignored(false);
             let lines = repo.get_status_lines(status_opts);

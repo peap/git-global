@@ -83,9 +83,27 @@ fn test_scan() {
 }
 
 #[test]
+fn test_staged() {
+    utils::with_base_dir_of_three_repos(|config| {
+        let report = subcommands::staged::execute(config).unwrap();
+        // There are no global messages.
+        assert_eq!(report_to_string(&report), "");
+    });
+}
+
+#[test]
 fn test_status() {
     utils::with_base_dir_of_three_repos(|config| {
         let report = subcommands::status::execute(config).unwrap();
+        // There are no global messages.
+        assert_eq!(report_to_string(&report), "");
+    });
+}
+
+#[test]
+fn test_unstaged() {
+    utils::with_base_dir_of_three_repos(|config| {
+        let report = subcommands::unstaged::execute(config).unwrap();
         // There are no global messages.
         assert_eq!(report_to_string(&report), "");
     });

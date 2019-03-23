@@ -12,12 +12,15 @@ git repos: `git global`.
 
 Use `git global <subcommand>` to:
 
-* `git global [status]`: show `git status -s` for all your git repos (the
-  default subcommand)
-* `git global info`: show information about git-global itself (configuration,
-  number of known repos, etc.)
-* `git global list`: show all git repos that git-global knows about
-* `git global scan`: search your filesystem for git repos and update the cache
+* `git global info`: show meta-information about git-global itself
+  (configuration, number of known repos, etc.)
+* `git global list`: show list of all known repos
+* `git global scan`: update the cache of known repos by searching your
+  filesystem
+* `git global staged`: show status of the git index for repos with such changes
+* `git global status`: show `git status -s` for all your repos with any changes
+* `git global unstaged`: show status of the working directory for repos with
+  such changes
 
 ## Configuration
 
@@ -51,8 +54,6 @@ The full list of configuration options supported in the `global` section of
 
 The following are some ideas I've had about future subcommands and features:
 
-* `git global unstaged`: show all repos that have unstaged changes
-* `git global staged`: show all repos that have staged changes
 * `git global stashed`: show all repos that have stashed changes
 * `git global dirty`: show all repos that have changes of any kind
 * `git global branched`: show all repos not on `master` (TODO: or a different
@@ -74,9 +75,13 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
-* 0.2.1 (work-in-progress)
-  * Add `default-cmd` config option to change the default subcommand.
-  * Add `show-untracked` config option to show/ignore untracked files.
+* 0.3.0 (work-in-progress)
+  * Add subcommands:
+    * `staged`
+    * `unstaged`
+  * Add config options:
+    * `default-cmd`
+    * `show-untracked`
 * 0.2.0 (2019-03-18)
   * Include untracked files in status output.
   * Expand documentation and package metadata.

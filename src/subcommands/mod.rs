@@ -2,7 +2,9 @@
 pub mod info;
 pub mod list;
 pub mod scan;
+pub mod staged;
 pub mod status;
+pub mod unstaged;
 
 use config::Config;
 use errors::{GitGlobalError, Result};
@@ -14,7 +16,9 @@ pub fn run(command: &str, config: Config) -> Result<Report> {
         "info" => info::execute(config),
         "list" => list::execute(config),
         "scan" => scan::execute(config),
+        "staged" => staged::execute(config),
         "status" => status::execute(config),
+        "unstaged" => unstaged::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
     }
 }
@@ -25,8 +29,19 @@ pub fn run(command: &str, config: Config) -> Result<Report> {
 pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
     vec![
         ("info", "Shows meta-information about git-global"),
-        ("list", "Lists all known git repos"),
-        ("scan", "Updates cache of known git repos"),
-        ("status", "Shows status of all known git repos"),
+        ("list", "Lists all known repos"),
+        ("scan", "Updates cache of known repos"),
+        (
+            "staged",
+            "Show git index status for repos with staged changes",
+        ),
+        (
+            "status",
+            "Shows status (`git status -s`) for repos with any changes",
+        ),
+        (
+            "unstaged",
+            "Show working dir status for repos with unstaged changes",
+        ),
     ]
 }
