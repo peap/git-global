@@ -22,10 +22,21 @@ Use `git global <subcommand>` to:
 * `git global unstaged`: show status of the working directory for repos with
   such changes
 
+## Command-line flags
+
+In addition to config-file-based options, there are a set of global
+command-line flags that take precedence:
+
+* `--json`: Print subcommand results in a JSON format.
+* `--untracked`: Show untracked files in subcommand results, e.g., for the
+  `status`, `staged`, and `unstaged` subcommands.
+* `--nountracked`: Don't show untracked files in subcommand results, e.g., for
+  the `status`, `staged`, and `unstaged` subcommands.
+
 ## Configuration
 
-To change the behavior of `git-global`, you can do so with --- wait for it
---- [git's global
+To change the default behavior of `git-global`, you can do so with --- wait for
+it --- [git's global
 configuration](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration)!
 
 To set the root directory for repo discovery to something other than your home
@@ -82,6 +93,9 @@ The following are some ideas I've had about future subcommands and features:
   * Add config options:
     * `default-cmd`
     * `show-untracked`
+  * Add command-line flags:
+    * `--untracked`
+    * `--nountracked`
 * 0.2.0 (2019-03-18)
   * Include untracked files in status output.
   * Expand documentation and package metadata.
