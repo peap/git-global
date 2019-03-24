@@ -1,7 +1,6 @@
 //! Git repository representation for git-global.
 
 use std::fmt;
-use std::io::{stderr, Write};
 use std::path::PathBuf;
 
 use git2;
@@ -20,8 +19,11 @@ impl Repo {
     }
 
     /// Returns the `git2::Repository` equivalent of this repo.
-    pub fn as_git2_repo(&self) -> Option<git2::Repository> {
-        git2::Repository::open(&self.path).ok()
+    pub fn as_git2_repo(&self) -> git2::Repository {
+        git2::Repository::open(&self.path).ok().expect(
+            "Could not open {} as a git repo. Perhaps you should run \
+             `git global scan` again.",
+        )
     }
 
     /// Returns the full path to the repo as a `String`.
@@ -34,19 +36,7 @@ impl Repo {
         &self,
         mut status_opts: git2::StatusOptions,
     ) -> Vec<String> {
-        let git2_repo = match self.as_git2_repo() {
-            None => {
-                writeln!(
-                    &mut stderr(),
-                    "Could not open {} as a git repo. Perhaps you should run \
-                     `git global scan` again.",
-                    self
-                )
-                .expect("failed to write to STDERR");
-                return vec![];
-            }
-            Some(repo) => repo,
-        };
+        let git2_repo = self.as_git2_repo();
         let statuses = git2_repo
             .statuses(Some(&mut status_opts))
             .expect(&format!("Could not get statuses for {}.", self));
@@ -59,6 +49,18 @@ impl Repo {
                 format!("{} {}", status_for_path, path)
             })
             .collect()
+    }
+
+    /// Returns the list of stash entries for the repo.
+    pub fn get_stash_list(&self) -> Vec<String> {
+        let mut stash = vec![];
+        self.as_git2_repo()
+            .stash_foreach(|index, name, _oid| {
+                stash.push(format!("stash@{{{}}}: {}", index, name));
+                true
+            })
+            .unwrap();
+        stash
     }
 }
 

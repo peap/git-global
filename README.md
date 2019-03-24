@@ -18,6 +18,7 @@ Use `git global <subcommand>` to:
 * `git global scan`: update the cache of known repos by searching your
   filesystem
 * `git global staged`: show status of the git index for repos with such changes
+* `git global stashed`: show stashes for all repos that have them
 * `git global status`: show `git status -s` for all your repos with any changes
 * `git global unstaged`: show status of the working directory for repos with
   such changes
@@ -65,7 +66,6 @@ The full list of configuration options supported in the `global` section of
 
 The following are some ideas I've had about future subcommands and features:
 
-* `git global stashed`: show all repos that have stashed changes
 * `git global dirty`: show all repos that have changes of any kind
 * `git global branched`: show all repos not on `master` (TODO: or a different
   default branch in .gitconfig)
@@ -89,6 +89,7 @@ The following are some ideas I've had about future subcommands and features:
 * 0.3.0 (work-in-progress)
   * Add subcommands:
     * `staged`
+    * `stashed`
     * `unstaged`
   * Add config options:
     * `default-cmd`

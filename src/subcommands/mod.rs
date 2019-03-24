@@ -3,6 +3,7 @@ pub mod info;
 pub mod list;
 pub mod scan;
 pub mod staged;
+pub mod stashed;
 pub mod status;
 pub mod unstaged;
 
@@ -17,6 +18,7 @@ pub fn run(command: &str, config: Config) -> Result<Report> {
         "list" => list::execute(config),
         "scan" => scan::execute(config),
         "staged" => staged::execute(config),
+        "stashed" => stashed::execute(config),
         "status" => status::execute(config),
         "unstaged" => unstaged::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
@@ -35,6 +37,7 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
             "staged",
             "Show git index status for repos with staged changes",
         ),
+        ("stashed", "Shows repos with stashed changes"),
         (
             "status",
             "Shows status (`git status -s`) for repos with any changes",
