@@ -125,12 +125,15 @@ impl Config {
 
     /// Returns `true` if this directory entry should be included in scans.
     fn filter(&self, entry: &DirEntry) -> bool {
-        let entry_path = entry.path().to_str().expect("DirEntry without path.");
-
-        self.ignored_patterns
-            .iter()
-            .filter(|p| p != &"")
-            .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
+        if let Some(entry_path) = entry.path().to_str() {
+            self.ignored_patterns
+                .iter()
+                .filter(|p| p != &"")
+                .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
+        } else {
+            // Skip invalid file name
+            false
+        }
     }
 
     /// Walks the configured base directory, looking for git repos.
@@ -141,6 +144,8 @@ impl Config {
             self.basedir.display()
         );
         for entry in WalkDir::new(&self.basedir)
+            .follow_links(true)
+            .same_file_system(true)
             .into_iter()
             .filter_entry(|e| self.filter(e))
         {
