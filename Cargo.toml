@@ -23,7 +23,7 @@ doc = false
 app_dirs = "1.2"
 clap = "2"
 chrono = "0.4"
-dirs = "1"
+dirs = "2"
 json = "0.11"
 walkdir = "2"
 
@@ -32,5 +32,5 @@ regex = "1"
 tempdir = "0.3"
 
 [dependencies.git2]
-version = "0.8"
+version = "0.9"
 default-features = false  # don't want SSH/HTTPS/Curl
