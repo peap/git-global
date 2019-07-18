@@ -143,12 +143,10 @@ impl Config {
             "Scanning for git repos under {}; this may take a while...",
             self.basedir.display()
         );
-        for entry in WalkDir::new(&self.basedir)
-            .follow_links(true)
-            .same_file_system(true)
-            .into_iter()
-            .filter_entry(|e| self.filter(e))
-        {
+        let walker = WalkDir::new(&self.basedir).follow_links(true);
+        #[cfg(any(unix, windows))]
+        let walker = walker.same_file_system(true);
+        for entry in walker.into_iter().filter_entry(|e| self.filter(e)) {
             match entry {
                 Ok(entry) => {
                     if entry.file_type().is_dir() && entry.file_name() == ".git"
