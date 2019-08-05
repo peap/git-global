@@ -92,7 +92,7 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
-* 0.3.0 (work-in-progress)
+* 0.3.0 (2019-08-04)
   * Add subcommands:
     * `staged`
     * `stashed`
