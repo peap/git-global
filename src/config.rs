@@ -22,9 +22,13 @@ const APP: AppInfo = AppInfo {
 const CACHE_FILE: &'static str = "repos.txt";
 
 const DEFAULT_CMD: &'static str = "status";
+const DEFAULT_FOLLOW_SYMLINKS: bool = true;
+const DEFAULT_SAME_FILESYSTEM: bool = cfg!(any(unix, windows));
 const DEFAULT_SHOW_UNTRACKED: bool = true;
 
 const SETTING_BASEDIR: &'static str = "global.basedir";
+const SETTING_FOLLOW_SYMLINKS: &'static str = "global.follow-symlinks";
+const SETTING_SAME_FILESYSTEM: &'static str = "global.same-filesystem";
 const SETTING_IGNORE: &'static str = "global.ignore";
 const SETTING_DEFAULT_CMD: &'static str = "global.default-cmd";
 const SETTING_SHOW_UNTRACKED: &'static str = "global.show-untracked";
@@ -35,6 +39,17 @@ pub struct Config {
     ///
     /// Default: $HOME.
     pub basedir: PathBuf,
+
+    /// Whether to follow symbolic links when searching for git repos.
+    ///
+    /// Default: true
+    pub follow_symlinks: bool,
+
+    /// Whether to stay on the same filesystem (as `basedir`) when searching
+    /// for git repos on Unix or Windows.
+    ///
+    /// Default: true [on supported platforms]
+    pub same_filesystem: bool,
 
     /// Path patterns to ignore when searching for git repositories.
     ///
@@ -77,6 +92,12 @@ impl Config {
             Ok(cfg) => {
                 (Config {
                     basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
+                    follow_symlinks: cfg
+                        .get_bool(SETTING_FOLLOW_SYMLINKS)
+                        .unwrap_or(DEFAULT_FOLLOW_SYMLINKS),
+                    same_filesystem: cfg
+                        .get_bool(SETTING_SAME_FILESYSTEM)
+                        .unwrap_or(DEFAULT_SAME_FILESYSTEM),
                     ignored_patterns: cfg
                         .get_string(SETTING_IGNORE)
                         .unwrap_or(String::new())
@@ -96,6 +117,8 @@ impl Config {
                 // Build the default configuration.
                 (Config {
                     basedir: homedir,
+                    follow_symlinks: DEFAULT_FOLLOW_SYMLINKS,
+                    same_filesystem: DEFAULT_SAME_FILESYSTEM,
                     ignored_patterns: vec![],
                     default_cmd: String::from(DEFAULT_CMD),
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
@@ -143,9 +166,9 @@ impl Config {
             "Scanning for git repos under {}; this may take a while...",
             self.basedir.display()
         );
-        let walker = WalkDir::new(&self.basedir).follow_links(true);
-        #[cfg(any(unix, windows))]
-        let walker = walker.same_file_system(true);
+        let walker = WalkDir::new(&self.basedir)
+            .follow_links(self.follow_symlinks)
+            .same_file_system(self.same_filesystem);
         for entry in walker.into_iter().filter_entry(|e| self.filter(e)) {
             match entry {
                 Ok(entry) => {

@@ -37,6 +37,8 @@ where
     }
     let config = Config {
         basedir: base_path.to_path_buf(),
+        follow_symlinks: true,
+        same_filesystem: true,
         ignored_patterns: vec![],
         default_cmd: String::from("status"),
         show_untracked: true,

@@ -55,6 +55,12 @@ The full list of configuration options supported in the `global` section of
 `.gitconfig` is:
 
 * `basedir`: The root directory for repo discovery (default: `$HOME`)
+* `follow-symlinks`: Whether to follow symbolic links during repo discovery
+  (default: `true`)
+* `same-filesystem`: Whether to stay on the same filesystem as `basedir`
+  during repo discovery
+  ([on Unix or Windows only](https://docs.rs/walkdir/2.2.8/walkdir/struct.WalkDir.html#method.same_file_system))
+  (default: `true`)
 * `ignore`: Comma-separated list of patterns to exclude while walking
   directories (default: none)
 * `default-cmd`: The default subcommand to run if unspecified, i.e., when
@@ -94,9 +100,13 @@ The following are some ideas I've had about future subcommands and features:
   * Add config options:
     * `default-cmd`
     * `show-untracked`
+    * `follow-symlinks`
+    * `same-filesystem`
   * Add command-line flags:
     * `--untracked`
     * `--nountracked`
+  * Add options to follow symlinks and stay on the same filesystem while
+    scanning directories; both are `true` by default. (Thanks, pka!)
 * 0.2.0 (2019-03-18)
   * Include untracked files in status output.
   * Expand documentation and package metadata.
