@@ -60,7 +60,7 @@ The full list of configuration options supported in the `global` section of
 * `same-filesystem`: Whether to stay on the same filesystem as `basedir`
   during repo discovery
   ([on Unix or Windows only](https://docs.rs/walkdir/2.2.8/walkdir/struct.WalkDir.html#method.same_file_system))
-  (default: `true`)
+  (default: `true` on Windows or Unix, `false` otherwise)
 * `ignore`: Comma-separated list of patterns to exclude while walking
   directories (default: none)
 * `default-cmd`: The default subcommand to run if unspecified, i.e., when
