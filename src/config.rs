@@ -89,33 +89,31 @@ impl Config {
             };
         // Try to read user's Git configuration and return a Config object.
         match git2::Config::open_default() {
-            Ok(cfg) => {
-                (Config {
-                    basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
-                    follow_symlinks: cfg
-                        .get_bool(SETTING_FOLLOW_SYMLINKS)
-                        .unwrap_or(DEFAULT_FOLLOW_SYMLINKS),
-                    same_filesystem: cfg
-                        .get_bool(SETTING_SAME_FILESYSTEM)
-                        .unwrap_or(DEFAULT_SAME_FILESYSTEM),
-                    ignored_patterns: cfg
-                        .get_string(SETTING_IGNORE)
-                        .unwrap_or(String::new())
-                        .split(",")
-                        .map(|p| p.trim().to_string())
-                        .collect(),
-                    default_cmd: cfg
-                        .get_string(SETTING_DEFAULT_CMD)
-                        .unwrap_or(String::from(DEFAULT_CMD)),
-                    show_untracked: cfg
-                        .get_bool(SETTING_SHOW_UNTRACKED)
-                        .unwrap_or(DEFAULT_SHOW_UNTRACKED),
-                    cache_file: cache_file,
-                })
-            }
+            Ok(cfg) => Config {
+                basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
+                follow_symlinks: cfg
+                    .get_bool(SETTING_FOLLOW_SYMLINKS)
+                    .unwrap_or(DEFAULT_FOLLOW_SYMLINKS),
+                same_filesystem: cfg
+                    .get_bool(SETTING_SAME_FILESYSTEM)
+                    .unwrap_or(DEFAULT_SAME_FILESYSTEM),
+                ignored_patterns: cfg
+                    .get_string(SETTING_IGNORE)
+                    .unwrap_or(String::new())
+                    .split(",")
+                    .map(|p| p.trim().to_string())
+                    .collect(),
+                default_cmd: cfg
+                    .get_string(SETTING_DEFAULT_CMD)
+                    .unwrap_or(String::from(DEFAULT_CMD)),
+                show_untracked: cfg
+                    .get_bool(SETTING_SHOW_UNTRACKED)
+                    .unwrap_or(DEFAULT_SHOW_UNTRACKED),
+                cache_file: cache_file,
+            },
             Err(_) => {
                 // Build the default configuration.
-                (Config {
+                Config {
                     basedir: homedir,
                     follow_symlinks: DEFAULT_FOLLOW_SYMLINKS,
                     same_filesystem: DEFAULT_SAME_FILESYSTEM,
@@ -123,7 +121,7 @@ impl Config {
                     default_cmd: String::from(DEFAULT_CMD),
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
                     cache_file: cache_file,
-                })
+                }
             }
         }
     }
