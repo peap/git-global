@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/git-global.svg)](https://crates.io/crates/git-global)
 [![Crates.io](https://img.shields.io/crates/d/git-global.svg)](https://crates.io/crates/git-global)
+[![Build Status](https://travis-ci.com/peap/git-global.svg?branch=master)](https://travis-ci.com/peap/git-global)
 
 Use `git-global` to keep track of all the git repositories on your machine.
 
