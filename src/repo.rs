@@ -49,6 +49,43 @@ impl Repo {
             .collect()
     }
 
+    /// Transforms a git2::Branch into a git2::Comit
+    fn branch_to_commit(branch: git2::Branch) -> git2::Commit {
+        branch.into_reference().peel_to_commit().unwrap()
+    }
+
+    /// Walks trough revisions : returns all the ancestores Oids of a Commit
+    fn log(repo: &git2::Repository, commit: git2::Commit) -> Vec<git2::Oid> {
+        let mut revwalk = repo.revwalk().unwrap();
+        revwalk.push(commit.id()).unwrap();
+        revwalk.filter_map(|id| id.ok()).collect::<Vec<git2::Oid>>()
+    }
+
+    /// Returns true if origin is synced with all the local branches, and false if not
+    pub fn is_origin_synced(&self) -> bool {
+        let repo = self.as_git2_repo();
+        let local_branches =
+            repo.branches(Some(git2::BranchType::Local)).unwrap();
+        let remote_branches =
+            repo.branches(Some(git2::BranchType::Remote)).unwrap();
+
+        let remote_commit_ids = remote_branches
+            .map(|result| result.unwrap().0)
+            .map(Self::branch_to_commit)
+            .map(|commit| Self::log(&repo, commit))
+            .flatten()
+            .collect::<Vec<_>>();
+
+        let is_synced =
+            local_branches
+                .map(|result| result.unwrap().0)
+                .all(|branch| {
+                    let commit_id = Self::branch_to_commit(branch).id();
+                    remote_commit_ids.contains(&commit_id)
+                });
+        is_synced
+    }
+
     /// Returns the list of stash entries for the repo.
     pub fn get_stash_list(&self) -> Vec<String> {
         let mut stash = vec![];
