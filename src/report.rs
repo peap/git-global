@@ -3,7 +3,9 @@
 use std::collections::HashMap;
 use std::io::Write;
 
-use repo::Repo;
+use json::{object, array};
+
+use crate::repo::Repo;
 
 /// A report containing the results of a git-global subcommand.
 ///

@@ -2,10 +2,11 @@
 
 use std::io::{stderr, stdout, Write};
 
-use clap::{App, Arg, ArgMatches, SubCommand};
+use clap::{App, Arg, ArgMatches, SubCommand, crate_version};
+use json::object;
 
-use config::Config;
-use subcommands;
+use crate::config::Config;
+use crate::subcommands;
 
 /// Returns the definitive clap::App instance for git-global.
 fn get_clap_app<'a, 'b>() -> App<'a, 'b> {

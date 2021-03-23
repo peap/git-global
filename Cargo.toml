@@ -15,6 +15,8 @@ readme = "README.md"
 keywords = ["git"]
 categories = ["command-line-utilities", "development-tools"]
 
+edition = "2018"
+
 [[bin]]
 name = "git-global"
 doc = false

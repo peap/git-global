@@ -47,16 +47,6 @@
 //! [rfcl]: fn.run_from_command_line.html
 //! [subcommands]: subcommands/index.html
 
-extern crate app_dirs;
-extern crate chrono;
-#[macro_use]
-extern crate clap;
-extern crate dirs;
-extern crate git2;
-#[macro_use]
-extern crate json;
-extern crate walkdir;
-
 mod cli;
 mod config;
 mod errors;

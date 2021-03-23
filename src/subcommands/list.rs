@@ -1,8 +1,8 @@
 //! The `list` subcommand: lists all repos known to git-global.
 
-use config::Config;
-use errors::Result;
-use report::Report;
+use crate::config::Config;
+use crate::errors::Result;
+use crate::report::Report;
 
 /// Forces the display of each repo path, without any extra output.
 pub fn execute(mut config: Config) -> Result<Report> {
