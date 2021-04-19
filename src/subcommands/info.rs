@@ -1,13 +1,14 @@
 //! The `info` subcommand: shows metadata about the git-global installation.
 
 use chrono::Duration;
+use clap::crate_version;
 
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use config::Config;
-use errors::Result;
-use report::Report;
+use crate::config::Config;
+use crate::errors::Result;
+use crate::report::Report;
 
 /// Returns the age of a file in terms of days, hours, minutes, and seconds.
 fn get_age(filename: PathBuf) -> Option<String> {

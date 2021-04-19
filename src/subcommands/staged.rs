@@ -6,10 +6,10 @@ use std::thread;
 
 use git2;
 
-use config::Config;
-use errors::Result;
-use repo::Repo;
-use report::Report;
+use crate::config::Config;
+use crate::errors::Result;
+use crate::repo::Repo;
+use crate::report::Report;
 
 /// Runs the `staged` subcommand.
 pub fn execute(mut config: Config) -> Result<Report> {

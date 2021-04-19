@@ -7,9 +7,9 @@ pub mod stashed;
 pub mod status;
 pub mod unstaged;
 
-use config::Config;
-use errors::{GitGlobalError, Result};
-use report::Report;
+use crate::config::Config;
+use crate::errors::{GitGlobalError, Result};
+use crate::report::Report;
 
 /// Run the subcommand matching the provided `str`, returning a `Report`.
 pub fn run(command: &str, config: Config) -> Result<Report> {

@@ -1,10 +1,6 @@
-extern crate git2;
-extern crate git_global;
-extern crate tempdir;
-
 use std::path::PathBuf;
 
-use self::git_global::{Config, Repo};
+use git_global::{Config, Repo};
 
 /// Initialize an empty git repo in a temporary directory, then run a closure
 /// that takes that Repo instance.

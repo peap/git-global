@@ -1,14 +1,10 @@
-#[macro_use]
-extern crate clap;
-extern crate git_global;
-extern crate regex;
-
 mod utils;
 
 use std::io::Cursor;
 use std::path::PathBuf;
 
 use regex::{escape, Regex};
+use clap::crate_version;
 
 use git_global::{subcommands, Report};
 

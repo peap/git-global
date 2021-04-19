@@ -13,7 +13,7 @@ use dirs::home_dir;
 use git2;
 use walkdir::{DirEntry, WalkDir};
 
-use repo::Repo;
+use crate::repo::Repo;
 
 const APP: AppInfo = AppInfo {
     name: "git-global",

@@ -10,9 +10,9 @@
 //! The `scan` subcommand caches the list of git repos paths it finds, and can
 //! be rerun at any time to refresh the list.
 
-use config::Config;
-use errors::Result;
-use report::Report;
+use crate::config::Config;
+use crate::errors::Result;
+use crate::report::Report;
 
 /// Clears the cache, forces a rescan, and says how many repos were found.
 pub fn execute(mut config: Config) -> Result<Report> {

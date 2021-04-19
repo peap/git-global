@@ -3,10 +3,10 @@
 use std::sync::{mpsc, Arc};
 use std::thread;
 
-use config::Config;
-use errors::Result;
-use repo::Repo;
-use report::Report;
+use crate::config::Config;
+use crate::errors::Result;
+use crate::repo::Repo;
+use crate::report::Report;
 
 /// Runs the `stashed` subcommand.
 pub fn execute(mut config: Config) -> Result<Report> {
