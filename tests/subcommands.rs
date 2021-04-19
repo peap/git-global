@@ -3,8 +3,8 @@ mod utils;
 use std::io::Cursor;
 use std::path::PathBuf;
 
-use regex::{escape, Regex};
 use clap::crate_version;
+use regex::{escape, Regex};
 
 use git_global::{subcommands, Report};
 

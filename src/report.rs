@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::io::Write;
 
-use json::{object, array};
+use json::{array, object};
 
 use crate::repo::Repo;
 

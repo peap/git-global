@@ -2,7 +2,7 @@
 
 use std::io::{stderr, stdout, Write};
 
-use clap::{App, Arg, ArgMatches, SubCommand, crate_version};
+use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
 use json::object;
 
 use crate::config::Config;
