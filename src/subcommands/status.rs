@@ -4,8 +4,6 @@
 use std::sync::{mpsc, Arc};
 use std::thread;
 
-use git2;
-
 use crate::config::Config;
 use crate::errors::Result;
 use crate::repo::Repo;
@@ -25,9 +23,9 @@ pub fn execute(mut config: Config) -> Result<Report> {
         let repo = Arc::new(repo);
         thread::spawn(move || {
             let path = repo.path();
-            let mut status_opts = git2::StatusOptions::new();
+            let mut status_opts = ::git2::StatusOptions::new();
             status_opts
-                .show(git2::StatusShow::IndexAndWorkdir)
+                .show(::git2::StatusShow::IndexAndWorkdir)
                 .include_untracked(include_untracked)
                 .include_ignored(false);
             let lines = repo.get_status_lines(status_opts);

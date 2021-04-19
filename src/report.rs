@@ -19,15 +19,15 @@ pub struct Report {
 
 impl Report {
     /// Create a new `Report` for the given `Repo`s..
-    pub fn new(repos: &Vec<Repo>) -> Report {
+    pub fn new(repos: &[Repo]) -> Report {
         let mut repo_messages: HashMap<Repo, Vec<String>> = HashMap::new();
         for repo in repos {
             repo_messages.insert(repo.clone(), Vec::new());
         }
         Report {
             messages: Vec::new(),
-            repos: repos.clone(),
-            repo_messages: repo_messages,
+            repos: repos.to_owned(),
+            repo_messages,
             pad_repo_output: false,
         }
     }
@@ -47,9 +47,8 @@ impl Report {
 
     /// Adds a message that applies to the given repo.
     pub fn add_repo_message(&mut self, repo: &Repo, data_line: String) {
-        match self.repo_messages.get_mut(&repo) {
-            Some(item) => item.push(data_line),
-            None => (),
+        if let Some(item) = self.repo_messages.get_mut(&repo) {
+            item.push(data_line)
         }
     }
 
@@ -60,13 +59,13 @@ impl Report {
         }
         for repo in self.repos.iter() {
             let messages = self.repo_messages.get(&repo).unwrap();
-            if messages.len() > 0 {
+            if !messages.is_empty() {
                 writeln!(writer, "{}", repo).unwrap();
-                for line in messages.iter().filter(|l| *l != "") {
+                for line in messages.iter().filter(|l| !l.is_empty()) {
                     writeln!(writer, "{}", line).unwrap();
                 }
                 if self.pad_repo_output {
-                    writeln!(writer, "").unwrap();
+                    writeln!(writer).unwrap();
                 }
             }
         }
@@ -86,8 +85,8 @@ impl Report {
         }
         for (repo, messages) in self.repo_messages.iter() {
             json["repo_messages"][repo.path()] = array![];
-            if messages.len() > 0 {
-                for line in messages.iter().filter(|l| *l != "") {
+            if !messages.is_empty() {
+                for line in messages.iter().filter(|l| !l.is_empty()) {
                     json["repo_messages"][repo.path()]
                         .push(line.to_string())
                         .expect(

@@ -18,7 +18,7 @@ fn get_age(filename: PathBuf) -> Option<String> {
         .and_then(|metadata| metadata.modified().ok())
         .and_then(|mtime| SystemTime::now().duration_since(mtime).ok())
         .and_then(|dur| Duration::from_std(dur).ok())
-        .and_then(|dur| {
+        .map(|dur| {
             let days = dur.num_days();
             let hours = dur.num_hours() - (days * 24);
             let mins = dur.num_minutes() - (days * 24 * 60) - (hours * 60);
@@ -26,7 +26,7 @@ fn get_age(filename: PathBuf) -> Option<String> {
                 - (days * 24 * 60 * 60)
                 - (hours * 60 * 60)
                 - (mins * 60);
-            Some(format!("{}d, {}h, {}m, {}s", days, hours, mins, secs))
+            format!("{}d, {}h, {}m, {}s", days, hours, mins, secs)
         })
 }
 
@@ -34,9 +34,9 @@ fn get_age(filename: PathBuf) -> Option<String> {
 pub fn execute(mut config: Config) -> Result<Report> {
     let repos = config.get_repos();
     let mut report = Report::new(&repos);
-    let version = format!("{}", crate_version!());
+    let version = crate_version!().to_string();
     // beginning of underline:   git-global x.x.x
-    let mut underline = format!("===========");
+    let mut underline = "===========".to_string();
     for _ in 0..version.len() {
         underline.push('=');
     }
@@ -48,7 +48,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
     if let Some(age) = get_age(config.cache_file) {
         report.add_message(format!("Cache file age: {}", age));
     }
-    report.add_message(format!("Ignored patterns:"));
+    report.add_message("Ignored patterns:".to_string());
     for pat in config.ignored_patterns.iter() {
         report.add_message(format!("  {}", pat));
     }

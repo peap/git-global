@@ -55,11 +55,7 @@ pub fn run_from_command_line() -> i32 {
     let matches = clap_app.get_matches();
     let mut config = Config::new();
     merge_args_with_config(&mut config, &matches);
-    let default_cmd = &config.default_cmd.clone();
-    let report = match matches.subcommand_name() {
-        Some(cmd) => subcommands::run(cmd, config),
-        None => subcommands::run(default_cmd, config),
-    };
+    let report = subcommands::run(matches.subcommand_name(), config);
     let use_json = matches.is_present("json");
     match report {
         Ok(rep) => {

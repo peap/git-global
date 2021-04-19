@@ -10,7 +10,6 @@ use std::path::PathBuf;
 
 use app_dirs::{app_dir, get_app_dir, AppDataType, AppInfo};
 use dirs::home_dir;
-use git2;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::repo::Repo;
@@ -19,19 +18,19 @@ const APP: AppInfo = AppInfo {
     name: "git-global",
     author: "peap",
 };
-const CACHE_FILE: &'static str = "repos.txt";
+const CACHE_FILE: &str = "repos.txt";
 
-const DEFAULT_CMD: &'static str = "status";
+const DEFAULT_CMD: &str = "status";
 const DEFAULT_FOLLOW_SYMLINKS: bool = true;
 const DEFAULT_SAME_FILESYSTEM: bool = cfg!(any(unix, windows));
 const DEFAULT_SHOW_UNTRACKED: bool = true;
 
-const SETTING_BASEDIR: &'static str = "global.basedir";
-const SETTING_FOLLOW_SYMLINKS: &'static str = "global.follow-symlinks";
-const SETTING_SAME_FILESYSTEM: &'static str = "global.same-filesystem";
-const SETTING_IGNORE: &'static str = "global.ignore";
-const SETTING_DEFAULT_CMD: &'static str = "global.default-cmd";
-const SETTING_SHOW_UNTRACKED: &'static str = "global.show-untracked";
+const SETTING_BASEDIR: &str = "global.basedir";
+const SETTING_FOLLOW_SYMLINKS: &str = "global.follow-symlinks";
+const SETTING_SAME_FILESYSTEM: &str = "global.same-filesystem";
+const SETTING_IGNORE: &str = "global.ignore";
+const SETTING_DEFAULT_CMD: &str = "global.default-cmd";
+const SETTING_SHOW_UNTRACKED: &str = "global.show-untracked";
 
 /// A container for git-global configuration options.
 pub struct Config {
@@ -72,10 +71,16 @@ pub struct Config {
     pub cache_file: PathBuf,
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        Config::new()
+    }
+}
+
 impl Config {
     /// Create a new `Config` with the default behavior, first checking global
     /// git config options in ~/.gitconfig, then using defaults:
-    pub fn new() -> Config {
+    pub fn new() -> Self {
         // Find the user's home directory.
         let homedir = home_dir().expect("Could not determine home directory.");
         // Set the options that aren't user-configurable.
@@ -88,7 +93,7 @@ impl Config {
                 Err(_) => panic!("TODO: work without XDG"),
             };
         // Try to read user's Git configuration and return a Config object.
-        match git2::Config::open_default() {
+        match ::git2::Config::open_default() {
             Ok(cfg) => Config {
                 basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
                 follow_symlinks: cfg
@@ -99,17 +104,17 @@ impl Config {
                     .unwrap_or(DEFAULT_SAME_FILESYSTEM),
                 ignored_patterns: cfg
                     .get_string(SETTING_IGNORE)
-                    .unwrap_or(String::new())
-                    .split(",")
+                    .unwrap_or_default()
+                    .split(',')
                     .map(|p| p.trim().to_string())
                     .collect(),
                 default_cmd: cfg
                     .get_string(SETTING_DEFAULT_CMD)
-                    .unwrap_or(String::from(DEFAULT_CMD)),
+                    .unwrap_or_else(|_| String::from(DEFAULT_CMD)),
                 show_untracked: cfg
                     .get_bool(SETTING_SHOW_UNTRACKED)
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
-                cache_file: cache_file,
+                cache_file,
             },
             Err(_) => {
                 // Build the default configuration.
@@ -120,7 +125,7 @@ impl Config {
                     ignored_patterns: vec![],
                     default_cmd: String::from(DEFAULT_CMD),
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
-                    cache_file: cache_file,
+                    cache_file,
                 }
             }
         }
@@ -150,7 +155,7 @@ impl Config {
             self.ignored_patterns
                 .iter()
                 .filter(|p| p != &"")
-                .fold(true, |acc, pattern| acc && !entry_path.contains(pattern))
+                .all(|pattern| !entry_path.contains(pattern))
         } else {
             // Skip invalid file name
             false
@@ -168,26 +173,19 @@ impl Config {
             .follow_links(self.follow_symlinks)
             .same_file_system(self.same_filesystem);
         for entry in walker.into_iter().filter_entry(|e| self.filter(e)) {
-            match entry {
-                Ok(entry) => {
-                    if entry.file_type().is_dir() && entry.file_name() == ".git"
-                    {
-                        let parent_path = entry
-                            .path()
-                            .parent()
-                            .expect("Could not determine parent.");
-                        match parent_path.to_str() {
-                            Some(path) => {
-                                repos.push(Repo::new(path.to_string()));
-                            }
-                            None => (),
-                        }
+            if let Ok(entry) = entry {
+                if entry.file_type().is_dir() && entry.file_name() == ".git" {
+                    let parent_path = entry
+                        .path()
+                        .parent()
+                        .expect("Could not determine parent.");
+                    if let Some(path) = parent_path.to_str() {
+                        repos.push(Repo::new(path.to_string()));
                     }
                 }
-                Err(_) => (),
             }
         }
-        repos.sort_by(|a, b| a.path().cmp(&b.path()));
+        repos.sort_by_key(|r| r.path());
         repos
     }
 
@@ -197,7 +195,7 @@ impl Config {
     }
 
     /// Writes the given repo paths to the cache file.
-    fn cache_repos(&self, repos: &Vec<Repo>) {
+    fn cache_repos(&self, repos: &[Repo]) {
         if !self.cache_file.as_path().exists() {
             // Try to create the cache directory if the cache *file* doesn't
             // exist; app_dir() handles an existing directory just fine.
@@ -224,9 +222,9 @@ impl Config {
                 .expect("Could not open cache file.");
             let reader = BufReader::new(f);
             for line in reader.lines() {
-                match line {
-                    Ok(repo_path) => repos.push(Repo::new(repo_path)),
-                    Err(_) => (), // TODO: handle errors
+                // TODO: handle errors
+                if let Ok(repo_path) = line {
+                    repos.push(Repo::new(repo_path))
                 }
             }
         }

@@ -11,8 +11,12 @@ use crate::config::Config;
 use crate::errors::{GitGlobalError, Result};
 use crate::report::Report;
 
-/// Run the subcommand matching the provided `str`, returning a `Report`.
-pub fn run(command: &str, config: Config) -> Result<Report> {
+/// Run a subcommand, returning a `Report`.
+///
+/// If `None` is given for the optional subcommand, run `config.default_cmd`.
+/// Else, try to match the given `&str` to a known subcommand.
+pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
+    let command = maybe_subcmd.unwrap_or(&config.default_cmd);
     match command {
         "info" => info::execute(config),
         "list" => list::execute(config),

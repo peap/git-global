@@ -3,8 +3,6 @@
 use std::fmt;
 use std::path::PathBuf;
 
-use git2;
-
 /// A git repository, represented by the full path to its base directory.
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct Repo {
@@ -19,8 +17,8 @@ impl Repo {
     }
 
     /// Returns the `git2::Repository` equivalent of this repo.
-    pub fn as_git2_repo(&self) -> git2::Repository {
-        git2::Repository::open(&self.path).ok().expect(
+    pub fn as_git2_repo(&self) -> ::git2::Repository {
+        ::git2::Repository::open(&self.path).expect(
             "Could not open {} as a git repo. Perhaps you should run \
              `git global scan` again.",
         )
@@ -34,12 +32,12 @@ impl Repo {
     /// Returns "short format" status output.
     pub fn get_status_lines(
         &self,
-        mut status_opts: git2::StatusOptions,
+        mut status_opts: ::git2::StatusOptions,
     ) -> Vec<String> {
         let git2_repo = self.as_git2_repo();
         let statuses = git2_repo
             .statuses(Some(&mut status_opts))
-            .expect(&format!("Could not get statuses for {}.", self));
+            .unwrap_or_else(|_| panic!("Could not get statuses for {}.", self));
         statuses
             .iter()
             .map(|entry| {
@@ -73,7 +71,7 @@ impl fmt::Display for Repo {
 /// Translates a file's status flags to their "short format" representation.
 ///
 /// Follows an example in the git2-rs crate's `examples/status.rs`.
-fn get_short_format_status(status: git2::Status) -> String {
+fn get_short_format_status(status: ::git2::Status) -> String {
     let mut istatus = match status {
         s if s.is_index_new() => 'A',
         s if s.is_index_modified() => 'M',
