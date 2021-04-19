@@ -44,9 +44,13 @@ pub fn execute(mut config: Config) -> Result<Report> {
     report.add_message(underline);
     report.add_message(format!("Number of repos: {}", repos.len()));
     report.add_message(format!("Base directory: {}", config.basedir.display()));
-    report.add_message(format!("Cache file: {}", config.cache_file.display()));
-    if let Some(age) = get_age(config.cache_file) {
-        report.add_message(format!("Cache file age: {}", age));
+    if let Some(cache_file) = config.cache_file {
+        report.add_message(format!("Cache file: {}", cache_file.display()));
+        if let Some(age) = get_age(cache_file) {
+            report.add_message(format!("Cache file age: {}", age));
+        }
+    } else {
+        report.add_message("Cache file: <none>".to_string());
     }
     report.add_message("Ignored patterns:".to_string());
     for pat in config.ignored_patterns.iter() {

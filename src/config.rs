@@ -4,20 +4,18 @@
 //! repos on the machine, path patterns to ignore when scanning for repos, the
 //! location of a cache file, and other config options for running git-global.
 
-use std::fs::{remove_file, File};
+use std::fs::{create_dir_all, remove_file, File};
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
-use app_dirs::{app_dir, get_app_dir, AppDataType, AppInfo};
-use dirs::home_dir;
+use directories::{ProjectDirs, UserDirs};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::repo::Repo;
 
-const APP: AppInfo = AppInfo {
-    name: "git-global",
-    author: "peap",
-};
+const QUALIFIER: &str = "";
+const ORGANIZATION: &str = "peap";
+const APPLICATION: &str = "git-global";
 const CACHE_FILE: &str = "repos.txt";
 
 const DEFAULT_CMD: &str = "status";
@@ -65,10 +63,11 @@ pub struct Config {
     /// Default: true
     pub show_untracked: bool,
 
-    /// Path a cache file for git-global's usage.
+    /// Optional path to a cache file for git-global's usage.
     ///
-    /// Default: `repos.txt` in the user's XDG cache directory.
-    pub cache_file: PathBuf,
+    /// Default: `repos.txt` in the user's XDG cache directory, if we understand
+    /// XDG for the host system.
+    pub cache_file: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -82,17 +81,14 @@ impl Config {
     /// git config options in ~/.gitconfig, then using defaults:
     pub fn new() -> Self {
         // Find the user's home directory.
-        let homedir = home_dir().expect("Could not determine home directory.");
+        let homedir = UserDirs::new()
+            .expect("Could not determine home directory.")
+            .home_dir()
+            .to_path_buf();
         // Set the options that aren't user-configurable.
         let cache_file =
-            match get_app_dir(AppDataType::UserCache, &APP, "cache") {
-                Ok(mut dir) => {
-                    dir.push(CACHE_FILE);
-                    dir
-                }
-                Err(_) => panic!("TODO: work without XDG"),
-            };
-        // Try to read user's Git configuration and return a Config object.
+            ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
+                .map(|project_dirs| project_dirs.cache_dir().join(CACHE_FILE));
         match ::git2::Config::open_default() {
             Ok(cfg) => Config {
                 basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
@@ -144,8 +140,9 @@ impl Config {
     /// `get_repos()` call.
     pub fn clear_cache(&mut self) {
         if self.has_cache() {
-            remove_file(&self.cache_file)
-                .expect("Failed to delete cache file.");
+            if let Some(file) = &self.cache_file {
+                remove_file(&file).expect("Failed to delete cache file.");
+            }
         }
     }
 
@@ -191,25 +188,25 @@ impl Config {
 
     /// Returns boolean indicating if the cache file exists.
     fn has_cache(&self) -> bool {
-        self.cache_file.exists()
+        self.cache_file.as_ref().map_or(false, |f| f.exists())
     }
 
     /// Writes the given repo paths to the cache file.
     fn cache_repos(&self, repos: &[Repo]) {
-        if !self.cache_file.as_path().exists() {
-            // Try to create the cache directory if the cache *file* doesn't
-            // exist; app_dir() handles an existing directory just fine.
-            match app_dir(AppDataType::UserCache, &APP, "cache") {
-                Ok(_) => (),
-                Err(e) => panic!("Could not create cache directory: {}", e),
+        if let Some(file) = &self.cache_file {
+            if !file.exists() {
+                if let Some(parent) = &file.parent() {
+                    create_dir_all(parent)
+                        .expect("Could not create cache directory.")
+                }
             }
-        }
-        let mut f = File::create(&self.cache_file)
-            .expect("Could not create cache file.");
-        for repo in repos.iter() {
-            match writeln!(f, "{}", repo.path()) {
-                Ok(_) => (),
-                Err(e) => panic!("Problem writing cache file: {}", e),
+            let mut f =
+                File::create(file).expect("Could not create cache file.");
+            for repo in repos.iter() {
+                match writeln!(f, "{}", repo.path()) {
+                    Ok(_) => (),
+                    Err(e) => panic!("Problem writing cache file: {}", e),
+                }
             }
         }
     }
@@ -217,14 +214,15 @@ impl Config {
     /// Returns the list of repos found in the cache file.
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
-        if self.cache_file.exists() {
-            let f = File::open(&self.cache_file)
-                .expect("Could not open cache file.");
-            let reader = BufReader::new(f);
-            for line in reader.lines() {
-                // TODO: handle errors
-                if let Ok(repo_path) = line {
-                    repos.push(Repo::new(repo_path))
+        if let Some(file) = &self.cache_file {
+            if file.exists() {
+                let f = File::open(file).expect("Could not open cache file.");
+                let reader = BufReader::new(f);
+                for line in reader.lines() {
+                    // TODO: handle errors
+                    if let Ok(repo_path) = line {
+                        repos.push(Repo::new(repo_path))
+                    }
                 }
             }
         }

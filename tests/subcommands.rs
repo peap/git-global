@@ -18,7 +18,13 @@ fn report_to_string(report: &Report) -> String {
 fn test_info() {
     utils::with_base_dir_of_three_repos(|config| {
         let basedir = config.basedir.clone();
-        let cache = config.cache_file.clone().to_str().unwrap().to_string();
+        let cache = config
+            .cache_file
+            .clone()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
         let report = subcommands::info::execute(config).unwrap();
         let expected = vec![
             format!(r"^git-global {}$", crate_version!()),
