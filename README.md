@@ -95,9 +95,11 @@ The following are some ideas I've had about future subcommands and features:
 
 * 0.4.0 (2021-04-19)
   * Update to Rust 2018 edition (Thanks, koalp!).
-  * Replace creates `dirs` and `app_dirs` with `directories`.
-    * Cache files may need to be regenerated after upgrading to this version,
-      but we no longer panic if they can't be created.
+  * Replace the `dirs` and `app_dirs` crates with `directories`.
+    * Previously created cache files may be ignored after upgrading to this
+      version, so the cache might need to regenerated during the first command
+      run after upgrading to this version. However, we no longer panic if the
+      cache file can't be created.
 * 0.3.2 (2020-11-13)
   * Update dependencies.
 * 0.3.1 (2020-04-25)
