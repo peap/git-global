@@ -93,6 +93,9 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
+* 0.4.0 (2021-04-18)
+  * Update to Rust 2018 edition (Thanks, koalp!).
+  * Update dependencies.
 * 0.3.2 (2020-11-13)
   * Update dependencies.
 * 0.3.1 (2020-04-25)
