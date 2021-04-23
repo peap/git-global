@@ -39,7 +39,7 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
         ("scan", "Updates cache of known repos"),
         (
             "staged",
-            "Show git index status for repos with staged changes",
+            "Shows git index status for repos with staged changes",
         ),
         ("stashed", "Shows repos with stashed changes"),
         (
@@ -48,7 +48,7 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
         ),
         (
             "unstaged",
-            "Show working dir status for repos with unstaged changes",
+            "Shows working dir status for repos with unstaged changes",
         ),
     ]
 }
