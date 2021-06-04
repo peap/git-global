@@ -93,6 +93,8 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
+* 0.4.1 (2021-06-03)
+  * Fix crashes when a cached repo has been deleted.
 * 0.4.0 (2021-04-19)
   * Update to Rust 2018 edition (Thanks, koalp!).
   * Replace the `dirs` and `app_dirs` crates with `directories`.

@@ -18,10 +18,13 @@ impl Repo {
 
     /// Returns the `git2::Repository` equivalent of this repo.
     pub fn as_git2_repo(&self) -> ::git2::Repository {
-        ::git2::Repository::open(&self.path).expect(
-            "Could not open {} as a git repo. Perhaps you should run \
-             `git global scan` again.",
-        )
+        ::git2::Repository::open(&self.path).unwrap_or_else(|_| {
+            panic!(
+                "Could not open {} as a git repo. Perhaps you should run \
+                   `git global scan` again.",
+                &self.path.as_path().to_str().unwrap()
+            )
+        })
     }
 
     /// Returns the full path to the repo as a `String`.

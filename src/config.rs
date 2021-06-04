@@ -6,7 +6,7 @@
 
 use std::fs::{create_dir_all, remove_file, File};
 use std::io::{BufRead, BufReader, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use directories::{ProjectDirs, UserDirs};
 use walkdir::{DirEntry, WalkDir};
@@ -219,8 +219,10 @@ impl Config {
                 let f = File::open(file).expect("Could not open cache file.");
                 let reader = BufReader::new(f);
                 for line in reader.lines() {
-                    // TODO: handle errors
                     if let Ok(repo_path) = line {
+                        if !Path::new(&repo_path).exists() {
+                            continue;
+                        }
                         repos.push(Repo::new(repo_path))
                     }
                 }
