@@ -169,16 +169,16 @@ impl Config {
         let walker = WalkDir::new(&self.basedir)
             .follow_links(self.follow_symlinks)
             .same_file_system(self.same_filesystem);
-        for entry in walker.into_iter().filter_entry(|e| self.filter(e)) {
-            if let Ok(entry) = entry {
-                if entry.file_type().is_dir() && entry.file_name() == ".git" {
-                    let parent_path = entry
-                        .path()
-                        .parent()
-                        .expect("Could not determine parent.");
-                    if let Some(path) = parent_path.to_str() {
-                        repos.push(Repo::new(path.to_string()));
-                    }
+        for entry in walker
+            .into_iter()
+            .filter_entry(|e| self.filter(e))
+            .flatten()
+        {
+            if entry.file_type().is_dir() && entry.file_name() == ".git" {
+                let parent_path =
+                    entry.path().parent().expect("Could not determine parent.");
+                if let Some(path) = parent_path.to_str() {
+                    repos.push(Repo::new(path.to_string()));
                 }
             }
         }
@@ -218,13 +218,11 @@ impl Config {
             if file.exists() {
                 let f = File::open(file).expect("Could not open cache file.");
                 let reader = BufReader::new(f);
-                for line in reader.lines() {
-                    if let Ok(repo_path) = line {
-                        if !Path::new(&repo_path).exists() {
-                            continue;
-                        }
-                        repos.push(Repo::new(repo_path))
+                for repo_path in reader.lines().flatten() {
+                    if !Path::new(&repo_path).exists() {
+                        continue;
                     }
+                    repos.push(Repo::new(repo_path))
                 }
             }
         }
