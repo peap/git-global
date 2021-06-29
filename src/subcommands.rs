@@ -1,11 +1,11 @@
 //! Subcommand implementations and dispatch function `run()`.
+pub mod ahead;
 pub mod info;
 pub mod list;
 pub mod scan;
 pub mod staged;
 pub mod stashed;
 pub mod status;
-pub mod unpushed;
 pub mod unstaged;
 
 use crate::config::Config;
@@ -26,7 +26,7 @@ pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
         "stashed" => stashed::execute(config),
         "status" => status::execute(config),
         "unstaged" => unstaged::execute(config),
-        "unpushed" => unpushed::execute(config),
+        "ahead" => ahead::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
     }
 }
@@ -53,7 +53,7 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
             "Show working dir status for repos with unstaged changes",
         ),
         (
-            "unpushed",
+            "ahead",
             "Shows repos with changes that are not pushed to a remote",
         ),
     ]

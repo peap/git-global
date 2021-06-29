@@ -49,20 +49,23 @@ impl Repo {
             .collect()
     }
 
-    /// Transforms a git2::Branch into a git2::Comit
+    /// Transforms a git2::Branch into a git2::Commit
     fn branch_to_commit(branch: git2::Branch) -> git2::Commit {
         branch.into_reference().peel_to_commit().unwrap()
     }
 
-    /// Walks trough revisions : returns all the ancestores Oids of a Commit
-    fn log(repo: &git2::Repository, commit: git2::Commit) -> Vec<git2::Oid> {
+    /// Walks trough revisions : returns all the ancestors Oids of a Commit
+    fn get_log(
+        repo: &git2::Repository,
+        commit: git2::Commit,
+    ) -> Vec<git2::Oid> {
         let mut revwalk = repo.revwalk().unwrap();
         revwalk.push(commit.id()).unwrap();
         revwalk.filter_map(|id| id.ok()).collect::<Vec<git2::Oid>>()
     }
 
-    /// Returns true if origin is synced with all the local branches, and false if not
-    pub fn is_origin_synced(&self) -> bool {
+    /// Returns true if commits of local branches are ahead of those on remote branches
+    pub fn is_ahead(&self) -> bool {
         let repo = self.as_git2_repo();
         let local_branches =
             repo.branches(Some(git2::BranchType::Local)).unwrap();
@@ -72,18 +75,18 @@ impl Repo {
         let remote_commit_ids = remote_branches
             .map(|result| result.unwrap().0)
             .map(Self::branch_to_commit)
-            .map(|commit| Self::log(&repo, commit))
+            .map(|commit| Self::get_log(&repo, commit))
             .flatten()
             .collect::<Vec<_>>();
 
-        let is_synced =
+        let is_ahead =
             local_branches
                 .map(|result| result.unwrap().0)
-                .all(|branch| {
+                .any(|branch| {
                     let commit_id = Self::branch_to_commit(branch).id();
-                    remote_commit_ids.contains(&commit_id)
+                    !remote_commit_ids.contains(&commit_id)
                 });
-        is_synced
+        is_ahead
     }
 
     /// Returns the list of stash entries for the repo.

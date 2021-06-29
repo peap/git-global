@@ -23,6 +23,8 @@ Use `git global <subcommand>` to:
 * `git global status`: show `git status -s` for all your repos with any changes
 * `git global unstaged`: show status of the working directory for repos with
   such changes
+- `git global ahead`: show list of repos where branches contains commits that
+not present on any of the remotes.
 
 ## Command-line flags
 
