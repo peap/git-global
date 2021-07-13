@@ -57,7 +57,7 @@ impl Repo {
         branch.into_reference().peel_to_commit().unwrap()
     }
 
-    /// Walks trough revisions : returns all the ancestors Oids of a Commit
+    /// Walks through revisions, returning all ancestor Oids of a Commit
     fn get_log(
         repo: &git2::Repository,
         commit: git2::Commit,

@@ -23,8 +23,8 @@ Use `git global <subcommand>` to:
 * `git global status`: show `git status -s` for all your repos with any changes
 * `git global unstaged`: show status of the working directory for repos with
   such changes
-- `git global ahead`: show list of repos where branches contains commits that
-not present on any of the remotes.
+* `git global ahead`: show repos where branches contain commits that are not
+  present on any of the remotes
 
 ## Command-line flags
 
@@ -95,6 +95,8 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
+* 0.5.0 (2021-07-12)
+  * Add the `ahead` subcommand - thanks, koalp!.
 * 0.4.1 (2021-06-03)
   * Fix crashes when a cached repo has been deleted.
 * 0.4.0 (2021-04-19)
