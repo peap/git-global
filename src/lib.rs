@@ -12,6 +12,8 @@
 //! $ git global info      # show information about git-global itself
 //! $ git global list      # show all git repos git-global knows about
 //! $ git global scan      # search your filesystem for git repos and update cache
+//! # ...
+//! $ git global help      # show usage and all subcommands
 //! ```
 //!
 //! # Public Interface

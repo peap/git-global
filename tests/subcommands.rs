@@ -1,5 +1,6 @@
 mod utils;
 
+use std::env;
 use std::io::Cursor;
 use std::path::PathBuf;
 
@@ -16,10 +17,20 @@ fn report_to_string(report: &Report) -> String {
 
 #[test]
 fn test_info() {
-    utils::with_base_dir_of_three_repos(|config| {
+    utils::with_base_dir_of_three_repos(|mut config| {
         let basedir = config.basedir.clone();
         let cache = config
             .cache_file
+            .clone()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_string();
+        if config.manpage_file.is_none() {
+            config.manpage_file = Some(PathBuf::from("/test"));
+        }
+        let manpage = config
+            .manpage_file
             .clone()
             .unwrap()
             .to_str()
@@ -31,11 +42,13 @@ fn test_info() {
             format!(r"^============+"),
             format!(r"^Number of repos: 3$"),
             format!(r"^Base directory: {}$", escape(basedir.to_str().unwrap())),
-            format!(r"^Cache file: {}$", escape(&cache)),
-            format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
             format!(r"^Ignored patterns:$"),
             format!(r"^Default command: status$"),
             format!(r"^Show untracked: true$"),
+            format!(r"^Cache file: {}$", escape(&cache)),
+            format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
+            format!(r"^Manpage file: {}$", escape(&manpage)),
+            format!(r"^Detected OS: {}$", escape(env::consts::OS)),
             format!(r"^$"),
         ];
         let output = report_to_string(&report);

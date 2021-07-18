@@ -4,6 +4,7 @@
 //! repos on the machine, path patterns to ignore when scanning for repos, the
 //! location of a cache file, and other config options for running git-global.
 
+use std::env;
 use std::fs::{create_dir_all, remove_file, File};
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
@@ -68,6 +69,12 @@ pub struct Config {
     /// Default: `repos.txt` in the user's XDG cache directory, if we understand
     /// XDG for the host system.
     pub cache_file: Option<PathBuf>,
+
+    /// Optional path to our manpage, regardless of whether it's installed.
+    ///
+    /// Default: `git-global.1` in the relevant manpages directory, if we
+    /// understand where that should be for the host system.
+    pub manpage_file: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -89,6 +96,16 @@ impl Config {
         let cache_file =
             ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
                 .map(|project_dirs| project_dirs.cache_dir().join(CACHE_FILE));
+        let manpage_file = match env::consts::OS {
+            "linux" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
+            "macos" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
+            "windows" => env::var("MSYSTEM").ok().and_then(|val| {
+                (val == "MINGW64").then(|| {
+                    PathBuf::from("/mingw64/share/doc/git-doc/git-global.html")
+                })
+            }),
+            _ => None,
+        };
         match ::git2::Config::open_default() {
             Ok(cfg) => Config {
                 basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
@@ -111,6 +128,7 @@ impl Config {
                     .get_bool(SETTING_SHOW_UNTRACKED)
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
                 cache_file,
+                manpage_file,
             },
             Err(_) => {
                 // Build the default configuration.
@@ -122,6 +140,7 @@ impl Config {
                     default_cmd: String::from(DEFAULT_CMD),
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
                     cache_file,
+                    manpage_file,
                 }
             }
         }

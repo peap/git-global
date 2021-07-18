@@ -41,6 +41,7 @@ where
         cache_file: Some(
             base_path.clone().join("test-cache-file.txt").to_path_buf(),
         ),
+        manpage_file: None,
     };
     test(config);
 }
