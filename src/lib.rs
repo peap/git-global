@@ -56,7 +56,7 @@ mod repo;
 mod report;
 pub mod subcommands; // Using `pub mod` so we see the docs.
 
-pub use cli::run_from_command_line;
+pub use cli::{get_clap_app, run_from_command_line};
 pub use config::Config;
 pub use errors::{GitGlobalError, Result};
 pub use repo::Repo;

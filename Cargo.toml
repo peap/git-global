@@ -17,9 +17,21 @@ categories = ["command-line-utilities", "development-tools"]
 
 edition = "2018"
 
+default-run = "git-global"
+
 [[bin]]
 name = "git-global"
+path = "src/main.rs"
 doc = false
+
+[[bin]]
+name = "generate-manpage"
+path = "src/generate_manpage.rs"
+doc = false
+required-features = ["manpage"]
+
+[features]
+manpage = ["man"]
 
 [dependencies]
 chrono = "0.4"
@@ -35,3 +47,7 @@ tempdir = "0.3"
 [dependencies.git2]
 version = "0.13"
 default-features = false  # don't want SSH/HTTPS/Curl
+
+[dependencies.man]
+version = "0.3"
+optional = true

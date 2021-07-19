@@ -10,6 +10,8 @@ This is a Rust program that you can install with `cargo install git-global`.
 (To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you can
 optionally install the manpage with `git global install-manpage`.
 
+Or: `cargo run --bin generate-manpage --features=manpage`
+
 Once installed, you gain an extra git subcommand that you can run from anywhere
 to check up on all your git repos: `git global`.  Use `git global <subcommand>`
 to:

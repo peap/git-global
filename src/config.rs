@@ -97,6 +97,7 @@ impl Config {
             ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
                 .map(|project_dirs| project_dirs.cache_dir().join(CACHE_FILE));
         let manpage_file = match env::consts::OS {
+            // Consider ~/.local/share/man/man1/, too.
             "linux" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
             "macos" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
             "windows" => env::var("MSYSTEM").ok().and_then(|val| {
