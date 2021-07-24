@@ -8,9 +8,7 @@ Use `git-global` to keep track of all the git repositories on your machine.
 
 This is a Rust program that you can install with `cargo install git-global`.
 (To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you can
-optionally install the manpage with `git global install-manpage`.
-
-Or: `cargo run --bin generate-manpage --features=manpage`
+optionally install the manpage with `git global install-manpage`
 
 Once installed, you gain an extra git subcommand that you can run from anywhere
 to check up on all your git repos: `git global`.  Use `git global <subcommand>`
@@ -74,6 +72,16 @@ The full list of configuration options supported in the `global` section of
   running `git global` (default: `status`)
 * `show-untracked`: Whether to include untracked files in output (default:
   `true`)
+
+## Manpage generation
+
+An up-to-date copy of the manpage lives in the repository at
+[doc/git-global.1](doc/git-global.1). To generate it from a local clone of the
+repo, run:
+
+```
+$ cargo run --bin generate-manpage --features=manpage > doc/git-global.1
+```
 
 ## Ideas
 

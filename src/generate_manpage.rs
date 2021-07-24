@@ -1,8 +1,10 @@
 use man::prelude::*;
 
 fn main() {
+    // TODO(peap): Switch to clap_generate when manpage rendering is supported.
     let app = git_global::get_clap_app();
-    let name_and_email: Vec<&str> = app.p.meta.author.unwrap().split(" <").collect();
+    let name_and_email: Vec<&str> =
+        app.p.meta.author.unwrap().split(" <").collect();
     let name = name_and_email[0];
     let email = name_and_email[1].strip_suffix(">").unwrap();
     let mut page = Manual::new(app.get_name())
@@ -13,13 +15,19 @@ fn main() {
             Flag::new()
                 .short(&arg.s.short.unwrap().to_string())
                 .long(arg.s.long.unwrap())
-                .help(arg.b.help.unwrap())
+                .help(arg.b.help.unwrap()),
         );
     }
-    let mut commands_section = Section::new("commands")
-            .paragraph("The following subcommands are supported by git global; use git's global config to set your default choice.");
+    let mut commands_section = Section::new("commands").paragraph(
+        "The following subcommands are supported by git global; \
+                        use git's global config to set your default choice.",
+    );
     for cmd in app.p.subcommands {
-        commands_section = commands_section.paragraph(&format!("{}: {}", cmd.p.meta.name, cmd.p.meta.about.unwrap()));
+        commands_section = commands_section.paragraph(&format!(
+            "{}: {}",
+            cmd.p.meta.name,
+            cmd.p.meta.about.unwrap()
+        ));
     }
     page = page.custom(commands_section);
     println!("{}", page.render());
