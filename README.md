@@ -2,7 +2,6 @@
 
 [![Crates.io](https://img.shields.io/crates/v/git-global.svg)](https://crates.io/crates/git-global)
 [![Crates.io](https://img.shields.io/crates/d/git-global.svg)](https://crates.io/crates/git-global)
-[![Build Status](https://travis-ci.com/peap/git-global.svg?branch=master)](https://travis-ci.com/peap/git-global)
 
 Use `git-global` to keep track of all the git repositories on your machine.
 
@@ -86,7 +85,7 @@ $ cargo run --bin generate-manpage --features=manpage > doc/git-global.1
 
 ## Ideas
 
-The following are some ideas I've had about future subcommands and features:
+The following are some ideas about future subcommands and features:
 
 * `git global dirty`: show all repos that have changes of any kind
 * `git global branched`: show all repos not on `master` (TODO: or a different
@@ -99,6 +98,8 @@ The following are some ideas I've had about future subcommands and features:
 * `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
+
+* `git global cd <fuzzy repo>`: change to the directory of the matched repo (#6)
 
 * stream results to `STDOUT` as the come in (from `git global status`, for
   example, so we don't have to wait until they're all collected)
