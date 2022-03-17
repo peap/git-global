@@ -2,33 +2,39 @@
 
 use std::io::{stderr, stdout, Write};
 
-use clap::{crate_version, App, Arg, ArgMatches, SubCommand};
+use clap::{
+    app_from_crate, crate_authors, crate_description, crate_name,
+    crate_version, App, Arg, ArgMatches, SubCommand,
+};
 use json::object;
 
 use crate::config::Config;
 use crate::subcommands;
 
 /// Returns the definitive clap::App instance for git-global.
-fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
-    App::new("git-global")
-        .version(crate_version!())
-        .author("Eric Petersen <eric@ericpetersen.io>")
-        .about("git subcommand for working with all git repos on a machine")
+pub fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
+    app_from_crate!()
         .arg(
             Arg::with_name("json")
+                .short("j")
                 .long("json")
+                .global(true)
                 .help("Output subcommand results in JSON."),
         )
         .arg(
             Arg::with_name("untracked")
+                .short("u")
                 .long("untracked")
                 .conflicts_with("nountracked")
+                .global(true)
                 .help("Show untracked files in output."),
         )
         .arg(
             Arg::with_name("nountracked")
+                .short("t")
                 .long("nountracked")
                 .conflicts_with("untracked")
+                .global(true)
                 .help("Don't show untracked files in output."),
         )
         .subcommands(subcommands::get_subcommands().iter().map(

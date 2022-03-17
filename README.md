@@ -7,14 +7,19 @@
 Use `git-global` to keep track of all the git repositories on your machine.
 
 This is a Rust program that you can install with `cargo install git-global`.
-(To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you gain
-an extra git subcommand that you can run from anywhere to check up on all your
-git repos: `git global`.
+(To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you can
+optionally install the manpage with `git global install-manpage`
 
-Use `git global <subcommand>` to:
+Once installed, you gain an extra git subcommand that you can run from anywhere
+to check up on all your git repos: `git global`.  Use `git global <subcommand>`
+to:
 
+* `git global ahead`: show repos where branches contain commits that are not
+  present on any of the remotes
 * `git global info`: show meta-information about git-global itself
   (configuration, number of known repos, etc.)
+* `git global install-manpage`: (non-functional) attempt to install
+  git-global's manpage
 * `git global list`: show list of all known repos
 * `git global scan`: update the cache of known repos by searching your
   filesystem
@@ -23,8 +28,6 @@ Use `git global <subcommand>` to:
 * `git global status`: show `git status -s` for all your repos with any changes
 * `git global unstaged`: show status of the working directory for repos with
   such changes
-* `git global ahead`: show repos where branches contain commits that are not
-  present on any of the remotes
 
 ## Command-line flags
 
@@ -71,6 +74,16 @@ The full list of configuration options supported in the `global` section of
 * `show-untracked`: Whether to include untracked files in output (default:
   `true`)
 
+## Manpage generation
+
+An up-to-date copy of the manpage lives in the repository at
+[doc/git-global.1](doc/git-global.1). To generate it from a local clone of the
+repo, run:
+
+```
+$ cargo run --bin generate-manpage --features=manpage > doc/git-global.1
+```
+
 ## Ideas
 
 The following are some ideas I've had about future subcommands and features:
@@ -95,6 +108,9 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
+* 0.5.1 (2022-03-17)
+  * Add the `generate-manpage` binary and (non-functional) `install-manpage`
+    subcommand.
 * 0.5.0 (2021-07-12)
   * Add the `ahead` subcommand - thanks, koalp!.
 * 0.4.1 (2021-06-03)

@@ -3,6 +3,7 @@
 use chrono::Duration;
 use clap::crate_version;
 
+use std::env;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
@@ -44,6 +45,12 @@ pub fn execute(mut config: Config) -> Result<Report> {
     report.add_message(underline);
     report.add_message(format!("Number of repos: {}", repos.len()));
     report.add_message(format!("Base directory: {}", config.basedir.display()));
+    report.add_message("Ignored patterns:".to_string());
+    for pat in config.ignored_patterns.iter() {
+        report.add_message(format!("  {}", pat));
+    }
+    report.add_message(format!("Default command: {}", config.default_cmd));
+    report.add_message(format!("Show untracked: {}", config.show_untracked));
     if let Some(cache_file) = config.cache_file {
         report.add_message(format!("Cache file: {}", cache_file.display()));
         if let Some(age) = get_age(cache_file) {
@@ -52,11 +59,11 @@ pub fn execute(mut config: Config) -> Result<Report> {
     } else {
         report.add_message("Cache file: <none>".to_string());
     }
-    report.add_message("Ignored patterns:".to_string());
-    for pat in config.ignored_patterns.iter() {
-        report.add_message(format!("  {}", pat));
+    if let Some(manpage_file) = config.manpage_file {
+        report.add_message(format!("Manpage file: {}", manpage_file.display()));
+    } else {
+        report.add_message("Manpage file: <none>".to_string());
     }
-    report.add_message(format!("Default command: {}", config.default_cmd));
-    report.add_message(format!("Show untracked: {}", config.show_untracked));
+    report.add_message(format!("Detected OS: {}", env::consts::OS));
     Ok(report)
 }

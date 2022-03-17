@@ -1,0 +1,61 @@
+.TH GIT-GLOBAL 1
+.SH NAME
+git\-global \- Keep track of all the git repositories on your machine.
+.SH SYNOPSIS
+\fBgit\-global\fR [FLAGS]
+.SH FLAGS
+.TP
+\fBj\fR, \fBjson\fR
+Output subcommand results in JSON.
+
+.TP
+\fBu\fR, \fBuntracked\fR
+Show untracked files in output.
+
+.TP
+\fBt\fR, \fBnountracked\fR
+Don't show untracked files in output.
+.SH VERSION
+Crate version 0.5.1
+
+
+.SH SUBCOMMANDS
+The following subcommands are supported by git global; use git's global config to set your default choice.
+
+ahead: Shows repos with changes that are not pushed to a remote
+
+info: Shows meta\-information about git\-global
+
+install\-manpage: Attempts to install git\-global's man page
+
+list: Lists all known repos
+
+scan: Updates cache of known repos
+
+staged: Shows git index status for repos with staged changes
+
+stashed: Shows repos with stashed changes
+
+status: Shows status (`git status \-s`) for repos with any changes
+
+unstaged: Shows working dir status for repos with unstaged changes
+
+
+.SH EXIT STATUS
+.TP
+\fB0\fR
+Successful program execution.
+
+.TP
+\fB1\fR
+Unsuccessful program execution.
+
+.TP
+\fB101\fR
+The program panicked.
+.SH AUTHOR
+.P
+.RS 2
+.nf
+Eric Petersen <eric@ericpetersen.io>
+

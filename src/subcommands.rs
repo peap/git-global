@@ -1,6 +1,7 @@
 //! Subcommand implementations and dispatch function `run()`.
 pub mod ahead;
 pub mod info;
+pub mod install_manpage;
 pub mod list;
 pub mod scan;
 pub mod staged;
@@ -27,6 +28,7 @@ pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
         "status" => status::execute(config),
         "unstaged" => unstaged::execute(config),
         "ahead" => ahead::execute(config),
+        "install-manpage" => install_manpage::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
     }
 }
@@ -36,7 +38,15 @@ pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
 /// Used for building the clap::App in the cli module.
 pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
     vec![
+        (
+            "ahead",
+            "Shows repos with changes that are not pushed to a remote",
+        ),
         ("info", "Shows meta-information about git-global"),
+        (
+            "install-manpage",
+            "Attempts to install git-global's man page",
+        ),
         ("list", "Lists all known repos"),
         ("scan", "Updates cache of known repos"),
         (
@@ -51,10 +61,6 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
         (
             "unstaged",
             "Shows working dir status for repos with unstaged changes",
-        ),
-        (
-            "ahead",
-            "Shows repos with changes that are not pushed to a remote",
         ),
     ]
 }
