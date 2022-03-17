@@ -1,7 +1,7 @@
 use man::prelude::*;
 
 fn main() {
-    // TODO(peap): Switch to clap_generate when manpage rendering is supported.
+    // TODO(peap): Consider switching to clap_mangen.
     let app = git_global::get_clap_app();
     let name_and_email: Vec<&str> =
         app.p.meta.author.unwrap().split(" <").collect();
@@ -9,7 +9,11 @@ fn main() {
     let email = name_and_email[1].strip_suffix(">").unwrap();
     let mut page = Manual::new(app.get_name())
         .about(app.p.meta.about.unwrap())
-        .author(Author::new(name).email(email));
+        .author(Author::new(name).email(email))
+        .custom(Section::new("version").paragraph(&format!(
+            "Crate version {}",
+            app.p.meta.version.unwrap()
+        )));
     for arg in app.p.global_args {
         page = page.flag(
             Flag::new()
@@ -18,7 +22,7 @@ fn main() {
                 .help(arg.b.help.unwrap()),
         );
     }
-    let mut commands_section = Section::new("commands").paragraph(
+    let mut commands_section = Section::new("subcommands").paragraph(
         "The following subcommands are supported by git global; \
                         use git's global config to set your default choice.",
     );

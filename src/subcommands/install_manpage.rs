@@ -12,7 +12,11 @@ use crate::report::Report;
 pub fn execute(mut config: Config) -> Result<Report> {
     let repos = config.get_repos();
     let mut report = Report::new(&repos);
-    report.add_message("this feature is a work-in-progress".to_string());
+    report.add_message("This feature is a work-in-progress.".to_string());
+    report.add_message(
+        "In the meantime, you can find the manpage at \
+         https://raw.githubusercontent.com/peap/git-global/master/doc/git-global.1".to_string()
+    );
     if let Some(manpage_file) = config.manpage_file {
         report.add_message(format!(
             "...would write file to {}",
