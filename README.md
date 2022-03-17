@@ -18,7 +18,8 @@ to:
   present on any of the remotes
 * `git global info`: show meta-information about git-global itself
   (configuration, number of known repos, etc.)
-* `git global install-manpage`: attempt to install git-global's manpage
+* `git global install-manpage`: (non-functional) attempt to install
+  git-global's manpage
 * `git global list`: show list of all known repos
 * `git global scan`: update the cache of known repos by searching your
   filesystem
@@ -107,8 +108,9 @@ The following are some ideas I've had about future subcommands and features:
 
 ## Release Notes
 
-* 0.5.1 (next)
-  * Add the `install-manpage` subcommand.
+* 0.5.1 (2022-03-17)
+  * Add the `generate-manpage` binary and (non-functional) `install-manpage`
+    subcommand.
 * 0.5.0 (2021-07-12)
   * Add the `ahead` subcommand - thanks, koalp!.
 * 0.4.1 (2021-06-03)
