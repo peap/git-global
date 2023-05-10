@@ -9,7 +9,7 @@ use crate::config::Config;
 use crate::subcommands;
 
 /// Returns the definitive clap::Command instance for git-global.
-pub fn get_clap_app<'a>() -> Command<'a> {
+pub fn get_clap_app() -> Command {
     command!()
         .arg(
             Arg::new("json")

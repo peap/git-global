@@ -43,7 +43,7 @@ regex = "1"
 tempfile = "3"
 
 [dependencies.clap]
-version = "3"
+version = "4"
 features = ["cargo"]
 
 [dependencies.git2]
