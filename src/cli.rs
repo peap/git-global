@@ -34,9 +34,11 @@ pub fn get_clap_app<'a>() -> App<'a> {
                 .global(true)
                 .help("Don't show untracked files in output."),
         )
-        .subcommands(subcommands::get_subcommands().iter().map(
-            |(ref cmd, ref desc)| SubCommand::with_name(*cmd).about(*desc),
-        ))
+        .subcommands(
+            subcommands::get_subcommands()
+                .iter()
+                .map(|(cmd, desc)| SubCommand::with_name(cmd).about(*desc)),
+        )
 }
 
 /// Merge command-line arguments from an ArgMatches object with a Config.

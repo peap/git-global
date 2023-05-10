@@ -78,8 +78,7 @@ impl Repo {
         let remote_commit_ids = remote_branches
             .map(|result| result.unwrap().0)
             .map(Self::branch_to_commit)
-            .map(|commit| Self::get_log(&repo, commit))
-            .flatten()
+            .flat_map(|commit| Self::get_log(&repo, commit))
             .collect::<Vec<_>>();
 
         let is_ahead =

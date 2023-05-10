@@ -28,7 +28,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
         let (path, ahead) = rx.recv().unwrap();
         let repo = Repo::new(path.to_string());
         if ahead {
-            report.add_repo_message(&repo, format!(""));
+            report.add_repo_message(&repo, String::new());
         }
     }
     Ok(report)

@@ -47,7 +47,7 @@ impl Report {
 
     /// Adds a message that applies to the given repo.
     pub fn add_repo_message(&mut self, repo: &Repo, data_line: String) {
-        if let Some(item) = self.repo_messages.get_mut(&repo) {
+        if let Some(item) = self.repo_messages.get_mut(repo) {
             item.push(data_line)
         }
     }
@@ -58,7 +58,7 @@ impl Report {
             writeln!(writer, "{}", msg).unwrap();
         }
         for repo in self.repos.iter() {
-            let messages = self.repo_messages.get(&repo).unwrap();
+            let messages = self.repo_messages.get(repo).unwrap();
             if !messages.is_empty() {
                 writeln!(writer, "{}", repo).unwrap();
                 for line in messages.iter().filter(|l| !l.is_empty()) {

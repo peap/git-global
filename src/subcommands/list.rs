@@ -12,7 +12,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
         // Report.print() already prints out the repo name if it has any
         // messages, so just add an empty string to force display of the repo
         // name.
-        report.add_repo_message(repo, format!(""));
+        report.add_repo_message(repo, String::new());
     }
     Ok(report)
 }

@@ -161,7 +161,7 @@ impl Config {
     pub fn clear_cache(&mut self) {
         if self.has_cache() {
             if let Some(file) = &self.cache_file {
-                remove_file(&file).expect("Failed to delete cache file.");
+                remove_file(file).expect("Failed to delete cache file.");
             }
         }
     }
