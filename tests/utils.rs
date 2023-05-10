@@ -9,7 +9,7 @@ pub fn with_temp_repo<T>(test: T) -> ()
 where
     T: FnOnce(Repo) -> (),
 {
-    let tempdir = tempdir::TempDir::new("git-global-test").unwrap();
+    let tempdir = tempfile::tempdir().unwrap();
     let repo_path = tempdir.path();
     git2::Repository::init(repo_path).unwrap();
     let repo = Repo::new(repo_path.to_str().unwrap().to_string());
@@ -24,7 +24,7 @@ pub fn with_base_dir_of_three_repos<T>(test: T) -> ()
 where
     T: FnOnce(Config) -> (),
 {
-    let tempdir = tempdir::TempDir::new("git-global-test").unwrap();
+    let tempdir = tempfile::tempdir().unwrap();
     let base_path = tempdir.path();
     for repo_name in ["a", "b", "c"].iter() {
         let mut repo_path = PathBuf::from(base_path);

@@ -110,6 +110,8 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.5.2 (2023-05-09)
+  * Update/remove several dependencies.
 * 0.5.1 (2022-03-17)
   * Add the `generate-manpage` binary and (non-functional) `install-manpage`
     subcommand.

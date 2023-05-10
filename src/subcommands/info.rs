@@ -1,6 +1,5 @@
 //! The `info` subcommand: shows metadata about the git-global installation.
 
-use chrono::Duration;
 use clap::crate_version;
 
 use std::env;
@@ -18,15 +17,13 @@ fn get_age(filename: PathBuf) -> Option<String> {
         .ok()
         .and_then(|metadata| metadata.modified().ok())
         .and_then(|mtime| SystemTime::now().duration_since(mtime).ok())
-        .and_then(|dur| Duration::from_std(dur).ok())
         .map(|dur| {
-            let days = dur.num_days();
-            let hours = dur.num_hours() - (days * 24);
-            let mins = dur.num_minutes() - (days * 24 * 60) - (hours * 60);
-            let secs = dur.num_seconds()
-                - (days * 24 * 60 * 60)
-                - (hours * 60 * 60)
-                - (mins * 60);
+            let ts = dur.as_secs();
+            let days = ts / (24 * 60 * 60);
+            let hours = (ts / (60 * 60)) - (days * 24);
+            let mins = (ts / 60) - (days * 24 * 60) - (hours * 60);
+            let secs =
+                ts - (days * 24 * 60 * 60) - (hours * 60 * 60) - (mins * 60);
             format!("{}d, {}h, {}m, {}s", days, hours, mins, secs)
         })
 }

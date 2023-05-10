@@ -2,28 +2,25 @@
 
 use std::io::{stderr, stdout, Write};
 
-use clap::{
-    app_from_crate, crate_authors, crate_description, crate_name,
-    crate_version, App, Arg, ArgMatches, SubCommand,
-};
+use clap::{app_from_crate, App, Arg, ArgMatches, SubCommand};
 use json::object;
 
 use crate::config::Config;
 use crate::subcommands;
 
 /// Returns the definitive clap::App instance for git-global.
-pub fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
+pub fn get_clap_app<'a>() -> App<'a> {
     app_from_crate!()
         .arg(
             Arg::with_name("json")
-                .short("j")
+                .short('j')
                 .long("json")
                 .global(true)
                 .help("Output subcommand results in JSON."),
         )
         .arg(
             Arg::with_name("untracked")
-                .short("u")
+                .short('u')
                 .long("untracked")
                 .conflicts_with("nountracked")
                 .global(true)
@@ -31,7 +28,7 @@ pub fn get_clap_app<'a, 'b>() -> App<'a, 'b> {
         )
         .arg(
             Arg::with_name("nountracked")
-                .short("t")
+                .short('t')
                 .long("nountracked")
                 .conflicts_with("untracked")
                 .global(true)
