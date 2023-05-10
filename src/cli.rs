@@ -2,34 +2,37 @@
 
 use std::io::{stderr, stdout, Write};
 
-use clap::{app_from_crate, App, Arg, ArgMatches, SubCommand};
+use clap::{command, Arg, ArgAction, ArgMatches, Command};
 use json::object;
 
 use crate::config::Config;
 use crate::subcommands;
 
-/// Returns the definitive clap::App instance for git-global.
-pub fn get_clap_app<'a>() -> App<'a> {
-    app_from_crate!()
+/// Returns the definitive clap::Command instance for git-global.
+pub fn get_clap_app<'a>() -> Command<'a> {
+    command!()
         .arg(
-            Arg::with_name("json")
+            Arg::new("json")
                 .short('j')
                 .long("json")
+                .action(ArgAction::SetTrue)
                 .global(true)
                 .help("Output subcommand results in JSON."),
         )
         .arg(
-            Arg::with_name("untracked")
+            Arg::new("untracked")
                 .short('u')
                 .long("untracked")
+                .action(ArgAction::SetTrue)
                 .conflicts_with("nountracked")
                 .global(true)
                 .help("Show untracked files in output."),
         )
         .arg(
-            Arg::with_name("nountracked")
+            Arg::new("nountracked")
                 .short('t')
                 .long("nountracked")
+                .action(ArgAction::SetTrue)
                 .conflicts_with("untracked")
                 .global(true)
                 .help("Don't show untracked files in output."),
@@ -37,16 +40,16 @@ pub fn get_clap_app<'a>() -> App<'a> {
         .subcommands(
             subcommands::get_subcommands()
                 .iter()
-                .map(|(cmd, desc)| SubCommand::with_name(cmd).about(*desc)),
+                .map(|(cmd, desc)| Command::new(*cmd).about(*desc)),
         )
 }
 
 /// Merge command-line arguments from an ArgMatches object with a Config.
 fn merge_args_with_config(config: &mut Config, matches: &ArgMatches) {
-    if matches.is_present("untracked") {
+    if matches.get_flag("untracked") {
         config.show_untracked = true;
     }
-    if matches.is_present("nountracked") {
+    if matches.get_flag("nountracked") {
         config.show_untracked = false;
     }
 }
@@ -61,7 +64,7 @@ pub fn run_from_command_line() -> i32 {
     let mut config = Config::new();
     merge_args_with_config(&mut config, &matches);
     let report = subcommands::run(matches.subcommand_name(), config);
-    let use_json = matches.is_present("json");
+    let use_json = matches.get_flag("json");
     match report {
         Ok(rep) => {
             if use_json {

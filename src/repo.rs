@@ -81,6 +81,7 @@ impl Repo {
             .flat_map(|commit| Self::get_log(&repo, commit))
             .collect::<Vec<_>>();
 
+        #[allow(clippy::let_and_return)]
         let is_ahead =
             local_branches
                 .map(|result| result.unwrap().0)

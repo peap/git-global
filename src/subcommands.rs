@@ -35,7 +35,7 @@ pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
 
 /// Return the list of all subcommand names and descriptions.
 ///
-/// Used for building the clap::App in the cli module.
+/// Used for building the clap::Command in the cli module.
 pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
     vec![
         (
