@@ -81,7 +81,7 @@ An up-to-date copy of the manpage lives in the repository at
 repo, run:
 
 ```
-$ cargo run --bin generate-manpage --features=manpage > doc/git-global.1
+cargo run --bin generate-manpage --features=manpage > doc/git-global.1
 ```
 
 ## Ideas
@@ -110,6 +110,8 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.6.1 (2023-08-10)
+  * Various dependency updates.
 * 0.6.0 (2023-05-10)
   * Update to Rust 2021 edition.
   * Update, replace, or remove several dependencies.
