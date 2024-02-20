@@ -39,7 +39,7 @@ where
         default_cmd: String::from("status"),
         show_untracked: true,
         cache_file: Some(
-            base_path.clone().join("test-cache-file.txt").to_path_buf(),
+            base_path.join("test-cache-file.txt").to_path_buf(),
         ),
         manpage_file: None,
     };

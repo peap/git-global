@@ -238,7 +238,7 @@ impl Config {
             if file.exists() {
                 let f = File::open(file).expect("Could not open cache file.");
                 let reader = BufReader::new(f);
-                for repo_path in reader.lines().flatten() {
+                for repo_path in reader.lines().map_while(Result::ok) {
                     if !Path::new(&repo_path).exists() {
                         continue;
                     }
