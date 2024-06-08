@@ -1,7 +1,7 @@
 [package]
 
 name = "git-global"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
 description = "Keep track of all the git repositories on your machine."
 
@@ -35,7 +35,7 @@ manpage = ["man"]
 
 [dependencies]
 directories = "5"
-json = "0.12"  # Unmaintained (RUSTSEC-2022-0081)
+serde_json = "1"
 walkdir = "2"
 
 [dev-dependencies]
@@ -53,3 +53,7 @@ default-features = false  # don't need SSH/HTTPS
 [dependencies.man]
 version = "0.3"
 optional = true
+
+[dependencies.serde]
+version = "1"
+features = ["derive"]

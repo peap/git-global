@@ -3,7 +3,7 @@
 use std::io::{stderr, stdout, Write};
 
 use clap::{command, Arg, ArgAction, ArgMatches, Command};
-use json::object;
+use serde_json::json;
 
 use crate::config::Config;
 use crate::subcommands;
@@ -76,11 +76,11 @@ pub fn run_from_command_line() -> i32 {
         }
         Err(err) => {
             if use_json {
-                let json = object! {
-                    "error" => true,
-                    "message" => format!("{}", err)
-                };
-                writeln!(&mut stderr(), "{:#}", json).unwrap();
+                let out = json!({
+                    "error": true,
+                    "message": format!("{}", err)
+                });
+                writeln!(&mut stderr(), "{:#}", out).unwrap();
             } else {
                 writeln!(&mut stderr(), "{}", err).unwrap();
             }

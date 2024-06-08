@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::io::Write;
 
-use json::{array, object};
+use serde_json::json;
 
 use crate::repo::Repo;
 
@@ -73,28 +73,16 @@ impl Report {
 
     /// Writes all result messages to the given writer, as JSON.
     pub fn print_json<W: Write>(&self, writer: &mut W) {
-        let mut json = object! {
-            "error" => false,
-            "messages" => array![],
-            "repo_messages" => object!{}
-        };
-        for msg in self.messages.iter() {
-            json["results"]["messages"]
-                .push(msg.to_string())
-                .expect("Failing pushing message to JSON messages array.");
-        }
+        let mut repo_messages: HashMap<String, Vec<&String>> = HashMap::new();
         for (repo, messages) in self.repo_messages.iter() {
-            json["repo_messages"][repo.path()] = array![];
-            if !messages.is_empty() {
-                for line in messages.iter().filter(|l| !l.is_empty()) {
-                    json["repo_messages"][repo.path()]
-                        .push(line.to_string())
-                        .expect(
-                            "Failed pushing line to JSON repo-messages array.",
-                        );
-                }
-            }
+            let msgs = messages.iter().filter(|l| !l.is_empty());
+            repo_messages.insert(repo.path(), msgs.collect());
         }
+        let json = json!({
+            "error": false,
+            "messages": self.messages,
+            "repo_messages": repo_messages
+        });
         writeln!(writer, "{:#}", json).unwrap();
     }
 }

@@ -3,8 +3,10 @@
 use std::fmt;
 use std::path::PathBuf;
 
+use serde::Serialize;
+
 /// A git repository, represented by the full path to its base directory.
-#[derive(Clone, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq, Serialize)]
 pub struct Repo {
     path: PathBuf,
 }
