@@ -55,8 +55,8 @@ impl Repo {
     }
 
     /// Transforms a git2::Branch into a git2::Commit
-    fn branch_to_commit(branch: git2::Branch) -> git2::Commit {
-        branch.into_reference().peel_to_commit().unwrap()
+    fn branch_to_commit(branch: git2::Branch) -> Option<git2::Commit> {
+        branch.into_reference().peel_to_commit().ok()
     }
 
     /// Walks through revisions, returning all ancestor Oids of a Commit
@@ -72,25 +72,30 @@ impl Repo {
     /// Returns true if commits of local branches are ahead of those on remote branches
     pub fn is_ahead(&self) -> bool {
         let repo = self.as_git2_repo();
-        let local_branches =
-            repo.branches(Some(git2::BranchType::Local)).unwrap();
+        let local_branches = match repo.branches(Some(git2::BranchType::Local))
+        {
+            Ok(branches) => branches,
+            Err(_) => return false,
+        };
         let remote_branches =
-            repo.branches(Some(git2::BranchType::Remote)).unwrap();
+            match repo.branches(Some(git2::BranchType::Remote)) {
+                Ok(branches) => branches,
+                Err(_) => return false,
+            };
 
         let remote_commit_ids = remote_branches
-            .map(|result| result.unwrap().0)
-            .map(Self::branch_to_commit)
+            .filter_map(|branch| branch.ok().map(|b| b.0))
+            .filter_map(Self::branch_to_commit)
             .flat_map(|commit| Self::get_log(&repo, commit))
             .collect::<Vec<_>>();
 
         #[allow(clippy::let_and_return)]
-        let is_ahead =
-            local_branches
-                .map(|result| result.unwrap().0)
-                .any(|branch| {
-                    let commit_id = Self::branch_to_commit(branch).id();
-                    !remote_commit_ids.contains(&commit_id)
-                });
+        let is_ahead = local_branches
+            .filter_map(|branch| branch.ok().map(|b| b.0))
+            .any(|branch| match Self::branch_to_commit(branch) {
+                Some(commit) => !remote_commit_ids.contains(&commit.id()),
+                None => false,
+            });
         is_ahead
     }
 
