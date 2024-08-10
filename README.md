@@ -110,6 +110,10 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.6.3 (2024-08-10)
+  * Make the `ahead` subcommand work with corrupted references (#105). Thanks,
+    koalp!
+  * Various dependency updates.
 * 0.6.2 (2024-06-08)
   * Various dependency updates, including `json` --> `serde_json`.
 * 0.6.1 (2023-08-10)
