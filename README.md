@@ -110,6 +110,8 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.6.4 (2025-01-01)
+  * Various dependency updates.
 * 0.6.3 (2024-08-10)
   * Make the `ahead` subcommand work with corrupted references (#105). Thanks,
     koalp!

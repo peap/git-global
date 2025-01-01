@@ -1,7 +1,7 @@
 [package]
 
 name = "git-global"
-version = "0.6.3"
+version = "0.6.4"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
 description = "Keep track of all the git repositories on your machine."
 
