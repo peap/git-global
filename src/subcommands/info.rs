@@ -47,6 +47,7 @@ pub fn execute(mut config: Config) -> Result<Report> {
         report.add_message(format!("  {}", pat));
     }
     report.add_message(format!("Default command: {}", config.default_cmd));
+    report.add_message(format!("Verbose: {}", config.verbose));
     report.add_message(format!("Show untracked: {}", config.show_untracked));
     if let Some(cache_file) = config.cache_file {
         report.add_message(format!("Cache file: {}", cache_file.display()));

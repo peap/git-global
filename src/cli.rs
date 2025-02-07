@@ -12,6 +12,14 @@ use crate::subcommands;
 pub fn get_clap_app() -> Command {
     command!()
         .arg(
+            Arg::new("verbose")
+                .short('v')
+                .long("verbose")
+                .action(ArgAction::SetTrue)
+                .global(true)
+                .help("Enable verbose mode."),
+        )
+        .arg(
             Arg::new("json")
                 .short('j')
                 .long("json")
@@ -46,6 +54,9 @@ pub fn get_clap_app() -> Command {
 
 /// Merge command-line arguments from an ArgMatches object with a Config.
 fn merge_args_with_config(config: &mut Config, matches: &ArgMatches) {
+    if matches.get_flag("verbose") {
+        config.verbose = true;
+    }
     if matches.get_flag("untracked") {
         config.show_untracked = true;
     }

@@ -44,6 +44,7 @@ fn test_info() {
             format!(r"^Base directory: {}$", escape(basedir.to_str().unwrap())),
             format!(r"^Ignored patterns:$"),
             format!(r"^Default command: status$"),
+            format!(r"^Verbose: false$"),
             format!(r"^Show untracked: true$"),
             format!(r"^Cache file: {}$", escape(&cache)),
             format!(r"^Cache file age: 0d, 0h, 0m, .s$"),

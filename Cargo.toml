@@ -1,7 +1,7 @@
 [package]
 
 name = "git-global"
-version = "0.6.4"
+version = "0.6.5"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
 description = "Keep track of all the git repositories on your machine."
 
@@ -36,6 +36,7 @@ manpage = ["man"]
 [dependencies]
 directories = "6"
 serde_json = "1"
+termsize = "0.1"
 walkdir = "2"
 
 [dev-dependencies]

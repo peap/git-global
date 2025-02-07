@@ -22,6 +22,7 @@ const CACHE_FILE: &str = "repos.txt";
 const DEFAULT_CMD: &str = "status";
 const DEFAULT_FOLLOW_SYMLINKS: bool = true;
 const DEFAULT_SAME_FILESYSTEM: bool = cfg!(any(unix, windows));
+const DEFAULT_VERBOSE: bool = false;
 const DEFAULT_SHOW_UNTRACKED: bool = true;
 
 const SETTING_BASEDIR: &str = "global.basedir";
@@ -30,6 +31,7 @@ const SETTING_SAME_FILESYSTEM: &str = "global.same-filesystem";
 const SETTING_IGNORE: &str = "global.ignore";
 const SETTING_DEFAULT_CMD: &str = "global.default-cmd";
 const SETTING_SHOW_UNTRACKED: &str = "global.show-untracked";
+const SETTING_VERBOSE: &str = "global.verbose";
 
 /// A container for git-global configuration options.
 pub struct Config {
@@ -58,6 +60,11 @@ pub struct Config {
     ///
     /// Default: `status`
     pub default_cmd: String,
+
+    /// Whether to enable verbose mode.
+    ///
+    /// Default: false
+    pub verbose: bool,
 
     /// Whether to show untracked files in output.
     ///
@@ -125,6 +132,9 @@ impl Config {
                 default_cmd: cfg
                     .get_string(SETTING_DEFAULT_CMD)
                     .unwrap_or_else(|_| String::from(DEFAULT_CMD)),
+                verbose: cfg
+                    .get_bool(SETTING_VERBOSE)
+                    .unwrap_or(DEFAULT_VERBOSE),
                 show_untracked: cfg
                     .get_bool(SETTING_SHOW_UNTRACKED)
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
@@ -139,6 +149,7 @@ impl Config {
                     same_filesystem: DEFAULT_SAME_FILESYSTEM,
                     ignored_patterns: vec![],
                     default_cmd: String::from(DEFAULT_CMD),
+                    verbose: DEFAULT_VERBOSE,
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
                     cache_file,
                     manpage_file,
@@ -186,6 +197,7 @@ impl Config {
             "Scanning for git repos under {}; this may take a while...",
             self.basedir.display()
         );
+        let mut n_dirs = 0;
         let walker = WalkDir::new(&self.basedir)
             .follow_links(self.follow_symlinks)
             .same_file_system(self.same_filesystem);
@@ -194,13 +206,35 @@ impl Config {
             .filter_entry(|e| self.filter(e))
             .flatten()
         {
-            if entry.file_type().is_dir() && entry.file_name() == ".git" {
-                let parent_path =
-                    entry.path().parent().expect("Could not determine parent.");
-                if let Some(path) = parent_path.to_str() {
-                    repos.push(Repo::new(path.to_string()));
+            if entry.file_type().is_dir() {
+                n_dirs += 1;
+                if entry.file_name() == ".git" {
+                    let parent_path = entry
+                        .path()
+                        .parent()
+                        .expect("Could not determine parent.");
+                    if let Some(path) = parent_path.to_str() {
+                        repos.push(Repo::new(path.to_string()));
+                    }
+                }
+                if self.verbose {
+                    if let Some(size) = termsize::get() {
+                        let prefix = format!(
+                            "\r... found {} repos; scanning directory #{}: ",
+                            repos.len(),
+                            n_dirs
+                        );
+                        let width = size.cols as usize - prefix.len() - 1;
+                        let mut cur_path =
+                            String::from(entry.path().to_str().unwrap());
+                        cur_path.truncate(width);
+                        print!("{}{:<width$}", prefix, cur_path);
+                    };
                 }
             }
+        }
+        if self.verbose {
+            println!();
         }
         repos.sort_by_key(|r| r.path());
         repos
@@ -208,7 +242,7 @@ impl Config {
 
     /// Returns boolean indicating if the cache file exists.
     fn has_cache(&self) -> bool {
-        self.cache_file.as_ref().map_or(false, |f| f.exists())
+        self.cache_file.as_ref().is_some_and(|f| f.exists())
     }
 
     /// Writes the given repo paths to the cache file.

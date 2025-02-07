@@ -37,6 +37,7 @@ where
         same_filesystem: true,
         ignored_patterns: vec![],
         default_cmd: String::from("status"),
+        verbose: false,
         show_untracked: true,
         cache_file: Some(base_path.join("test-cache-file.txt").to_path_buf()),
         manpage_file: None,

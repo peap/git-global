@@ -110,6 +110,10 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.6.5 (2025-02-07)
+  * Add a `-v`/`--verbose` flag, so far just used to indicate progress during
+    `scan`'s directory walking. Useful for identifying patterns that should be
+    omitted from scans.
 * 0.6.4 (2025-01-01)
   * Various dependency updates.
 * 0.6.3 (2024-08-10)
