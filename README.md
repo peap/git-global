@@ -110,6 +110,8 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.6.6 (2025-02-07)
+  * Fix an alignment issue with the `--verbose` flag's output.
 * 0.6.5 (2025-02-07)
   * Add a `-v`/`--verbose` flag, so far just used to indicate progress during
     `scan`'s directory walking. Useful for identifying patterns that should be

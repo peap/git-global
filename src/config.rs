@@ -227,7 +227,13 @@ impl Config {
                         let width = size.cols as usize - prefix.len() - 1;
                         let mut cur_path =
                             String::from(entry.path().to_str().unwrap());
-                        cur_path.truncate(width);
+                        let byte_width =
+                            match cur_path.char_indices().nth(width) {
+                                None => &cur_path,
+                                Some((idx, _)) => &cur_path[..idx],
+                            }
+                            .len();
+                        cur_path.truncate(byte_width);
                         print!("{}{:<width$}", prefix, cur_path);
                     };
                 }
