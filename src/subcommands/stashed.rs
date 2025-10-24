@@ -1,6 +1,6 @@
 //! The `stashed` subcommand: shows stash list for all known repos with stashes
 
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use crate::config::Config;

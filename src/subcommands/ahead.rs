@@ -1,6 +1,6 @@
 //! The `ahead` subcommand: shows repositories that have commits not pushed to a remote
 
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use crate::config::Config;

@@ -1,7 +1,7 @@
 [package]
 
 name = "git-global"
-version = "0.6.7"
+version = "0.6.8"
 authors = ["Eric Petersen <eric@ericpetersen.io>"]
 description = "Keep track of all the git repositories on your machine."
 
@@ -15,7 +15,7 @@ readme = "README.md"
 keywords = ["git"]
 categories = ["command-line-utilities", "development-tools", "filesystem"]
 
-edition = "2021"
+edition = "2024"
 
 default-run = "git-global"
 

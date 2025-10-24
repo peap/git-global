@@ -110,6 +110,9 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.7.0 (2025-10-24)
+  * Update to Rust 2024 edition.
+  * Various dependency updates.
 * 0.6.7 (2025-08-01)
   * Various dependency updates.
 * 0.6.6 (2025-02-07)

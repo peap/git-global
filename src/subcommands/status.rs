@@ -1,7 +1,7 @@
 //! The `status` subcommand: shows `git status -s` for all known repos with any
 //! changes to the index or working directory.
 
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use crate::config::Config;

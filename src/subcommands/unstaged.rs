@@ -1,7 +1,7 @@
 //! The `unstaged` subcommand: shows `git status -s` for unstaged changes in all
 //! known repos with such changes.
 
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use crate::config::Config;

@@ -1,7 +1,7 @@
 //! The `staged` subcommand: shows `git status -s` for staged changes in all
 //! known repos with such changes.
 
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use crate::config::Config;

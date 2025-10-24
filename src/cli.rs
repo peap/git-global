@@ -1,8 +1,8 @@
 //! The command line interface for git-global.
 
-use std::io::{stderr, stdout, Write};
+use std::io::{Write, stderr, stdout};
 
-use clap::{command, Arg, ArgAction, ArgMatches, Command};
+use clap::{Arg, ArgAction, ArgMatches, Command, command};
 use serde_json::json;
 
 use crate::config::Config;

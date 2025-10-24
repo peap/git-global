@@ -5,7 +5,7 @@
 //! location of a cache file, and other config options for running git-global.
 
 use std::env;
-use std::fs::{create_dir_all, remove_file, File};
+use std::fs::{File, create_dir_all, remove_file};
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
 
@@ -170,10 +170,10 @@ impl Config {
     /// Clears the cache of known git repos, forcing a re-scan on the next
     /// `get_repos()` call.
     pub fn clear_cache(&mut self) {
-        if self.has_cache() {
-            if let Some(file) = &self.cache_file {
-                remove_file(file).expect("Failed to delete cache file.");
-            }
+        if self.has_cache()
+            && let Some(file) = &self.cache_file
+        {
+            remove_file(file).expect("Failed to delete cache file.");
         }
     }
 
@@ -217,25 +217,24 @@ impl Config {
                         repos.push(Repo::new(path.to_string()));
                     }
                 }
-                if self.verbose {
-                    if let Some(size) = termsize::get() {
-                        let prefix = format!(
-                            "\r... found {} repos; scanning directory #{}: ",
-                            repos.len(),
-                            n_dirs
-                        );
-                        let width = size.cols as usize - prefix.len() - 1;
-                        let mut cur_path =
-                            String::from(entry.path().to_str().unwrap());
-                        let byte_width =
-                            match cur_path.char_indices().nth(width) {
-                                None => &cur_path,
-                                Some((idx, _)) => &cur_path[..idx],
-                            }
-                            .len();
-                        cur_path.truncate(byte_width);
-                        print!("{}{:<width$}", prefix, cur_path);
-                    };
+                if self.verbose
+                    && let Some(size) = termsize::get()
+                {
+                    let prefix = format!(
+                        "\r... found {} repos; scanning directory #{}: ",
+                        repos.len(),
+                        n_dirs
+                    );
+                    let width = size.cols as usize - prefix.len() - 1;
+                    let mut cur_path =
+                        String::from(entry.path().to_str().unwrap());
+                    let byte_width = match cur_path.char_indices().nth(width) {
+                        None => &cur_path,
+                        Some((idx, _)) => &cur_path[..idx],
+                    }
+                    .len();
+                    cur_path.truncate(byte_width);
+                    print!("{}{:<width$}", prefix, cur_path);
                 }
             }
         }
@@ -254,11 +253,11 @@ impl Config {
     /// Writes the given repo paths to the cache file.
     fn cache_repos(&self, repos: &[Repo]) {
         if let Some(file) = &self.cache_file {
-            if !file.exists() {
-                if let Some(parent) = &file.parent() {
-                    create_dir_all(parent)
-                        .expect("Could not create cache directory.")
-                }
+            if !file.exists()
+                && let Some(parent) = &file.parent()
+            {
+                create_dir_all(parent)
+                    .expect("Could not create cache directory.")
             }
             let mut f =
                 File::create(file).expect("Could not create cache file.");
@@ -274,16 +273,16 @@ impl Config {
     /// Returns the list of repos found in the cache file.
     fn get_cached_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
-        if let Some(file) = &self.cache_file {
-            if file.exists() {
-                let f = File::open(file).expect("Could not open cache file.");
-                let reader = BufReader::new(f);
-                for repo_path in reader.lines().map_while(Result::ok) {
-                    if !Path::new(&repo_path).exists() {
-                        continue;
-                    }
-                    repos.push(Repo::new(repo_path))
+        if let Some(file) = &self.cache_file
+            && file.exists()
+        {
+            let f = File::open(file).expect("Could not open cache file.");
+            let reader = BufReader::new(f);
+            for repo_path in reader.lines().map_while(Result::ok) {
+                if !Path::new(&repo_path).exists() {
+                    continue;
                 }
+                repos.push(Repo::new(repo_path))
             }
         }
         repos

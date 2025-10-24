@@ -5,9 +5,9 @@ use std::io::Cursor;
 use std::path::PathBuf;
 
 use clap::crate_version;
-use regex::{escape, Regex};
+use regex::{Regex, escape};
 
-use git_global::{subcommands, Report};
+use git_global::{Report, subcommands};
 
 fn report_to_string(report: &Report) -> String {
     let mut out = Cursor::new(Vec::new());
