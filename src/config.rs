@@ -18,6 +18,7 @@ const QUALIFIER: &str = "";
 const ORGANIZATION: &str = "peap";
 const APPLICATION: &str = "git-global";
 const CACHE_FILE: &str = "repos.txt";
+const IGNORED_REPOS_FILE: &str = "ignored.txt";
 
 const DEFAULT_CMD: &str = "status";
 const DEFAULT_FOLLOW_SYMLINKS: bool = true;
@@ -82,6 +83,11 @@ pub struct Config {
     /// Default: `git-global.1` in the relevant manpages directory, if we
     /// understand where that should be for the host system.
     pub manpage_file: Option<PathBuf>,
+
+    /// Optional path to a file listing ignored repos.
+    ///
+    /// Default: `ignored.txt` in the user's XDG cache directory.
+    pub ignored_repos_file: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -100,9 +106,13 @@ impl Config {
             .home_dir()
             .to_path_buf();
         // Set the options that aren't user-configurable.
-        let cache_file =
-            ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
-                .map(|project_dirs| project_dirs.cache_dir().join(CACHE_FILE));
+        let project_dirs = ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION);
+        let cache_file = project_dirs
+            .as_ref()
+            .map(|pd| pd.cache_dir().join(CACHE_FILE));
+        let ignored_repos_file = project_dirs
+            .as_ref()
+            .map(|pd| pd.cache_dir().join(IGNORED_REPOS_FILE));
         let manpage_file = match env::consts::OS {
             // Consider ~/.local/share/man/man1/, too.
             "linux" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
@@ -140,6 +150,7 @@ impl Config {
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
                 cache_file,
                 manpage_file,
+                ignored_repos_file,
             },
             Err(_) => {
                 // Build the default configuration.
@@ -153,6 +164,7 @@ impl Config {
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
                     cache_file,
                     manpage_file,
+                    ignored_repos_file,
                 }
             }
         }
@@ -178,21 +190,47 @@ impl Config {
     }
 
     /// Returns `true` if this directory entry should be included in scans.
-    fn filter(&self, entry: &DirEntry) -> bool {
-        if let Some(entry_path) = entry.path().to_str() {
-            self.ignored_patterns
-                .iter()
-                .filter(|p| p != &"")
-                .all(|pattern| !entry_path.contains(pattern))
-        } else {
+    fn filter(&self, entry: &DirEntry, ignored_repos: &[String]) -> bool {
+        let Some(entry_path) = entry.path().to_str() else {
             // Skip invalid file name
-            false
+            return false;
+        };
+
+        // Check against ignored_patterns (from global.ignore config)
+        let matches_pattern = self
+            .ignored_patterns
+            .iter()
+            .filter(|p| !p.is_empty())
+            .any(|pattern| entry_path.contains(pattern));
+        if matches_pattern {
+            return false;
         }
+
+        // Check against ignored repos list (from ignore subcommand)
+        // Get canonical path for symlink handling
+        let canonical_path = entry
+            .path()
+            .canonicalize()
+            .ok()
+            .and_then(|p| p.to_str().map(String::from));
+
+        let is_ignored = ignored_repos.iter().any(|ignored_path| {
+            // Check if entry is the ignored path or under it
+            entry_path == ignored_path
+                || entry_path.starts_with(&format!("{}/", ignored_path))
+                // Also check canonical path
+                || canonical_path.as_ref().is_some_and(|cp| {
+                    cp == ignored_path || cp.starts_with(&format!("{}/", ignored_path))
+                })
+        });
+
+        !is_ignored
     }
 
     /// Walks the configured base directory, looking for git repos.
     fn find_repos(&self) -> Vec<Repo> {
         let mut repos = Vec::new();
+        let ignored_repos = self.get_ignored_repos();
         println!(
             "Scanning for git repos under {}; this may take a while...",
             self.basedir.display()
@@ -203,7 +241,7 @@ impl Config {
             .same_file_system(self.same_filesystem);
         for entry in walker
             .into_iter()
-            .filter_entry(|e| self.filter(e))
+            .filter_entry(|e| self.filter(e, &ignored_repos))
             .flatten()
         {
             if entry.file_type().is_dir() {
@@ -213,8 +251,11 @@ impl Config {
                         .path()
                         .parent()
                         .expect("Could not determine parent.");
-                    if let Some(path) = parent_path.to_str() {
-                        repos.push(Repo::new(path.to_string()));
+                    // Validate it's actually a valid git repo before adding
+                    if git2::Repository::open(parent_path).is_ok() {
+                        if let Some(path) = parent_path.to_str() {
+                            repos.push(Repo::new(path.to_string()));
+                        }
                     }
                 }
                 if self.verbose
@@ -270,8 +311,9 @@ impl Config {
         }
     }
 
-    /// Returns the list of repos found in the cache file.
+    /// Returns the list of repos found in the cache file, excluding ignored repos.
     fn get_cached_repos(&self) -> Vec<Repo> {
+        let ignored = self.get_ignored_repos();
         let mut repos = Vec::new();
         if let Some(file) = &self.cache_file
             && file.exists()
@@ -279,12 +321,87 @@ impl Config {
             let f = File::open(file).expect("Could not open cache file.");
             let reader = BufReader::new(f);
             for repo_path in reader.lines().map_while(Result::ok) {
-                if !Path::new(&repo_path).exists() {
+                let path = Path::new(&repo_path);
+                if !path.exists() {
+                    continue;
+                }
+                // Get canonical path if possible (resolves symlinks)
+                let canonical_path = path
+                    .canonicalize()
+                    .ok()
+                    .and_then(|p| p.to_str().map(String::from));
+                // Check if repo matches any ignored path (exact match or prefix)
+                // Check both original and canonical paths since symlinks inside
+                // a path might resolve outside the ignored prefix
+                let is_ignored = ignored.iter().any(|ignored_path| {
+                    let prefix = format!("{}/", ignored_path);
+                    // Check original path
+                    repo_path == *ignored_path
+                        || repo_path.starts_with(&prefix)
+                        // Check canonical path if available
+                        || canonical_path.as_ref().is_some_and(|cp| {
+                            cp == ignored_path || cp.starts_with(&prefix)
+                        })
+                });
+                if is_ignored {
                     continue;
                 }
                 repos.push(Repo::new(repo_path))
             }
         }
         repos
+    }
+
+    /// Returns the list of ignored repo paths.
+    pub fn get_ignored_repos(&self) -> Vec<String> {
+        let mut ignored = Vec::new();
+        if let Some(file) = &self.ignored_repos_file
+            && file.exists()
+        {
+            let f = File::open(file).expect("Could not open ignored repos file.");
+            let reader = BufReader::new(f);
+            for repo_path in reader.lines().map_while(Result::ok) {
+                ignored.push(repo_path);
+            }
+        }
+        ignored
+    }
+
+    /// Adds a path to the ignored repos file.
+    /// Can be a git repo or a directory prefix (all repos under it will be ignored).
+    pub fn ignore_repo(&self, repo_path: &str) -> Result<(), String> {
+        // Canonicalize the path to ensure consistency
+        let canonical = Path::new(repo_path)
+            .canonicalize()
+            .map_err(|e| format!("Invalid path '{}': {}", repo_path, e))?;
+        let canonical_str = canonical
+            .to_str()
+            .ok_or_else(|| format!("Path '{}' contains invalid UTF-8", repo_path))?;
+
+        // Check if already ignored
+        let ignored = self.get_ignored_repos();
+        if ignored.contains(&canonical_str.to_string()) {
+            return Err(format!("'{}' is already ignored", canonical_str));
+        }
+
+        // Add to ignored file
+        if let Some(file) = &self.ignored_repos_file {
+            if !file.exists() {
+                if let Some(parent) = file.parent() {
+                    create_dir_all(parent)
+                        .map_err(|e| format!("Could not create directory: {}", e))?;
+                }
+            }
+            let mut f = File::options()
+                .create(true)
+                .append(true)
+                .open(file)
+                .map_err(|e| format!("Could not open ignored repos file: {}", e))?;
+            writeln!(f, "{}", canonical_str)
+                .map_err(|e| format!("Could not write to ignored repos file: {}", e))?;
+            Ok(())
+        } else {
+            Err("No ignored repos file configured".to_string())
+        }
     }
 }
