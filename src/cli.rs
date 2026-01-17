@@ -48,7 +48,18 @@ pub fn get_clap_app() -> Command {
         .subcommands(
             subcommands::get_subcommands()
                 .iter()
-                .map(|(cmd, desc)| Command::new(*cmd).about(*desc)),
+                .map(|(cmd, desc)| {
+                    let mut subcmd = Command::new(*cmd).about(*desc);
+                    if *cmd == "ignore" {
+                        subcmd = subcmd.arg(
+                            Arg::new("pattern")
+                                .help("Pattern to add to global.ignore (matches paths containing this string)")
+                                .required(true)
+                                .index(1),
+                        );
+                    }
+                    subcmd
+                }),
         )
 }
 
@@ -74,7 +85,17 @@ pub fn run_from_command_line() -> i32 {
     let matches = clap_app.get_matches();
     let mut config = Config::new();
     merge_args_with_config(&mut config, &matches);
-    let report = subcommands::run(matches.subcommand_name(), config);
+
+    // Extract additional arguments for subcommands that need them
+    let args = matches.subcommand().and_then(|(name, sub_matches)| {
+        if name == "ignore" {
+            sub_matches.get_one::<String>("pattern").map(|s| s.as_str())
+        } else {
+            None
+        }
+    });
+
+    let report = subcommands::run(matches.subcommand_name(), config, args);
     let use_json = matches.get_flag("json");
     match report {
         Ok(rep) => {
