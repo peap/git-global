@@ -1,5 +1,7 @@
 //! Subcommand implementations and dispatch function `run()`.
 pub mod ahead;
+pub mod ignore;
+pub mod ignored;
 pub mod info;
 pub mod install_manpage;
 pub mod list;
@@ -17,7 +19,12 @@ use crate::report::Report;
 ///
 /// If `None` is given for the optional subcommand, run `config.default_cmd`.
 /// Else, try to match the given `&str` to a known subcommand.
-pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
+/// The `args` parameter is used for subcommands that require additional arguments.
+pub fn run(
+    maybe_subcmd: Option<&str>,
+    config: Config,
+    args: Option<&str>,
+) -> Result<Report> {
     let command = maybe_subcmd.unwrap_or(&config.default_cmd);
     match command {
         "info" => info::execute(config),
@@ -29,6 +36,13 @@ pub fn run(maybe_subcmd: Option<&str>, config: Config) -> Result<Report> {
         "unstaged" => unstaged::execute(config),
         "ahead" => ahead::execute(config),
         "install-manpage" => install_manpage::execute(config),
+        "ignore" => {
+            let path = args.ok_or_else(|| {
+                GitGlobalError::BadSubcommand("ignore requires a path argument".to_string())
+            })?;
+            ignore::execute(config, path)
+        }
+        "ignored" => ignored::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),
     }
 }
@@ -42,6 +56,8 @@ pub fn get_subcommands() -> Vec<(&'static str, &'static str)> {
             "ahead",
             "Shows repos with changes that are not pushed to a remote",
         ),
+        ("ignore", "Ignores a repo, removing it from the list"),
+        ("ignored", "Lists all ignored repos"),
         ("info", "Shows meta-information about git-global"),
         (
             "install-manpage",

@@ -182,7 +182,7 @@ impl Config {
         if let Some(entry_path) = entry.path().to_str() {
             self.ignored_patterns
                 .iter()
-                .filter(|p| p != &"")
+                .filter(|p| !p.is_empty())
                 .all(|pattern| !entry_path.contains(pattern))
         } else {
             // Skip invalid file name
@@ -213,8 +213,11 @@ impl Config {
                         .path()
                         .parent()
                         .expect("Could not determine parent.");
-                    if let Some(path) = parent_path.to_str() {
-                        repos.push(Repo::new(path.to_string()));
+                    // Validate it's actually a valid git repo before adding
+                    if git2::Repository::open(parent_path).is_ok() {
+                        if let Some(path) = parent_path.to_str() {
+                            repos.push(Repo::new(path.to_string()));
+                        }
                     }
                 }
                 if self.verbose
@@ -286,5 +289,36 @@ impl Config {
             }
         }
         repos
+    }
+
+    /// Adds a pattern to the global.ignore setting in gitconfig.
+    pub fn add_ignore_pattern(pattern: &str) -> Result<(), String> {
+        let mut cfg = git2::Config::open_default()
+            .map_err(|e| format!("Could not open git config: {}", e))?;
+
+        // Get current patterns
+        let current = cfg.get_string(SETTING_IGNORE).unwrap_or_default();
+        let patterns: Vec<&str> = current
+            .split(',')
+            .map(|p| p.trim())
+            .filter(|p| !p.is_empty())
+            .collect();
+
+        // Check if already present
+        if patterns.contains(&pattern) {
+            return Err(format!("'{}' is already in global.ignore", pattern));
+        }
+
+        // Append new pattern
+        let new_value = if current.is_empty() {
+            pattern.to_string()
+        } else {
+            format!("{},{}", current, pattern)
+        };
+
+        cfg.set_str(SETTING_IGNORE, &new_value)
+            .map_err(|e| format!("Could not update git config: {}", e))?;
+
+        Ok(())
     }
 }
