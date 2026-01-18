@@ -35,6 +35,7 @@ manpage = ["man"]
 
 [dependencies]
 directories = "6"
+num_cpus = "1"
 serde_json = "1"
 termsize = "0.1"
 walkdir = "2"

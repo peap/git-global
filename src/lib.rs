@@ -52,6 +52,7 @@
 mod cli;
 mod config;
 mod errors;
+mod parallel;
 mod repo;
 mod report;
 pub mod subcommands; // Using `pub mod` so we see the docs.
