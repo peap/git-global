@@ -214,10 +214,10 @@ impl Config {
                         .parent()
                         .expect("Could not determine parent.");
                     // Validate it's actually a valid git repo before adding
-                    if git2::Repository::open(parent_path).is_ok() {
-                        if let Some(path) = parent_path.to_str() {
-                            repos.push(Repo::new(path.to_string()));
-                        }
+                    if git2::Repository::open(parent_path).is_ok()
+                        && let Some(path) = parent_path.to_str()
+                    {
+                        repos.push(Repo::new(path.to_string()));
                     }
                 }
                 if self.verbose

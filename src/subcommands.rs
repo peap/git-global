@@ -38,7 +38,9 @@ pub fn run(
         "install-manpage" => install_manpage::execute(config),
         "ignore" => {
             let path = args.ok_or_else(|| {
-                GitGlobalError::BadSubcommand("ignore requires a path argument".to_string())
+                GitGlobalError::BadSubcommand(
+                    "ignore requires a path argument".to_string(),
+                )
             })?;
             ignore::execute(config, path)
         }

@@ -16,6 +16,8 @@ to:
 
 * `git global ahead`: show repos where branches contain commits that are not
   present on any of the remotes
+* `git global ignore`: add a path pattern to ignore when finding repos
+* `git global ignored`: show the list of ignored patterns
 * `git global info`: show meta-information about git-global itself
   (configuration, number of known repos, etc.)
 * `git global install-manpage`: (non-functional) attempt to install
@@ -54,6 +56,8 @@ git config --global global.basedir /some/path
 
 To add patterns to exclude while walking directories:
 ```
+git global ignore <pattern>
+# or
 git config --global global.ignore .cargo,.vim,Library
 ```
 
@@ -73,6 +77,7 @@ The full list of configuration options supported in the `global` section of
   running `git global` (default: `status`)
 * `show-untracked`: Whether to include untracked files in output (default:
   `true`)
+* `verbose`: Whether to be more verbose in certain subcommands.
 
 ## Manpage generation
 
@@ -95,8 +100,6 @@ The following are some ideas about future subcommands and features:
 * `git global remotes`: show all remotes (TODO: why? maybe filter by hostname?)
 
 * `git global add <path>`: add a git repo to the cache that would not be found in a scan
-* `git global ignore <path>`: ignore a git repo and remove it from the cache
-* `git global ignored`: show which git repos are currently being ignored
 * `git global monitor`: launch a daemon to watch git dirs with inotify
 * `git global pull`: pull down changes from default tracking branch for clean repos
 
@@ -106,10 +109,13 @@ The following are some ideas about future subcommands and features:
   example, so we don't have to wait until they're all collected)
 * use `locate .git` if the DB is populated, instead of walking the filesystem
 * make a `Subcommand` trait
-* do concurrency generically, not just for the `status` subcommand
 
 ## Release Notes
 
+* 0.7.0 (2026-02-01)
+  * Add the `ignore` and `ignored` subcommands. Thanks, @justinabrahms!
+  * Limit subcommand parallelism to CPU core count. Thanks, @justinabrahms!
+  * Various dependency updates.
 * 0.6.8 (2025-10-24)
   * Update to Rust 2024 edition.
   * Various dependency updates.
@@ -125,7 +131,7 @@ The following are some ideas about future subcommands and features:
   * Various dependency updates.
 * 0.6.3 (2024-08-10)
   * Make the `ahead` subcommand work with corrupted references (#105). Thanks,
-    koalp!
+    @koalp!
   * Various dependency updates.
 * 0.6.2 (2024-06-08)
   * Various dependency updates, including `json` --> `serde_json`.
@@ -138,11 +144,11 @@ The following are some ideas about future subcommands and features:
   * Add the `generate-manpage` binary and (non-functional) `install-manpage`
     subcommand.
 * 0.5.0 (2021-07-12)
-  * Add the `ahead` subcommand - thanks, koalp!.
+  * Add the `ahead` subcommand - thanks, @koalp!.
 * 0.4.1 (2021-06-03)
   * Fix crashes when a cached repo has been deleted.
 * 0.4.0 (2021-04-19)
-  * Update to Rust 2018 edition (Thanks, koalp!).
+  * Update to Rust 2018 edition (Thanks, @koalp!).
   * Replace the `dirs` and `app_dirs` crates with `directories`.
     * Previously created cache files may be ignored after upgrading to this
       version, so the cache might need to regenerated during the first command
@@ -166,7 +172,7 @@ The following are some ideas about future subcommands and features:
     * `--untracked`
     * `--nountracked`
   * Add options to follow symlinks and stay on the same filesystem while
-    scanning directories; both are `true` by default. (Thanks, pka!)
+    scanning directories; both are `true` by default. (Thanks, @pka!)
 * 0.2.0 (2019-03-18)
   * Include untracked files in status output.
   * Expand documentation and package metadata.

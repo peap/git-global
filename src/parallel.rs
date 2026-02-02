@@ -26,7 +26,11 @@ pub fn default_parallelism() -> usize {
 ///
 /// # Returns
 /// A vector of (repo_path, result) tuples in completion order
-pub fn run_parallel<T, F>(repos: Vec<Repo>, max_threads: usize, f: F) -> Vec<(String, T)>
+pub fn run_parallel<T, F>(
+    repos: Vec<Repo>,
+    max_threads: usize,
+    f: F,
+) -> Vec<(String, T)>
 where
     T: Send + 'static,
     F: Fn(&Repo) -> T + Send + Sync + Clone + 'static,

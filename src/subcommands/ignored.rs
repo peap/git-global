@@ -15,7 +15,9 @@ pub fn execute(config: Config) -> Result<Report> {
     let mut report = Report::new(&[]);
     if patterns.is_empty() {
         report.add_message("No patterns in global.ignore.".to_string());
-        report.add_message("Use `git global ignore <pattern>` to add one.".to_string());
+        report.add_message(
+            "Use `git global ignore <pattern>` to add one.".to_string(),
+        );
     } else {
         report.add_message(format!("Ignored patterns ({}):", patterns.len()));
         for pattern in patterns {

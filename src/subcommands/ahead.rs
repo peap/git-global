@@ -11,7 +11,8 @@ pub fn execute(mut config: Config) -> Result<Report> {
     let repos = config.get_repos();
     let mut report = Report::new(&repos);
 
-    let results = run_parallel(repos, default_parallelism(), |repo| repo.is_ahead());
+    let results =
+        run_parallel(repos, default_parallelism(), |repo| repo.is_ahead());
 
     for (path, ahead) in results {
         if ahead {
