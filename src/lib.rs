@@ -62,3 +62,6 @@ pub use config::Config;
 pub use errors::{GitGlobalError, Result};
 pub use repo::Repo;
 pub use report::Report;
+
+#[doc(hidden)]
+pub mod test_utils;

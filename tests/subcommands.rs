@@ -8,6 +8,7 @@ use clap::crate_version;
 use regex::{Regex, escape};
 
 use git_global::{Report, subcommands};
+use git_global::test_utils::TestEnv;
 
 fn report_to_string(report: &Report) -> String {
     let mut out = Cursor::new(Vec::new());
@@ -74,7 +75,7 @@ fn test_list() {
         let report = subcommands::list::execute(config).unwrap();
         // There are no global messages; the per-repo messages are simply a list
         // of the repo paths themselves.
-        let expected = vec![
+        let expected = [
             PathBuf::from(&basedir).join("a"),
             PathBuf::from(&basedir).join("b"),
             PathBuf::from(&basedir).join("c"),
@@ -132,4 +133,52 @@ fn test_unstaged() {
         // There are no global messages.
         assert_eq!(report_to_string(&report), "");
     });
+}
+
+#[test]
+fn test_ahead() {
+    let mut env = TestEnv::new();
+    env.create_repo("repo-ahead")
+        .commit("file.txt", "initial")
+        .setup_remote()
+        .commit("file.txt", "ahead")
+        .build();
+
+    let config = env.config();
+    let repo_path = env.tempdir.path().join("repo-ahead");
+
+    let report = subcommands::ahead::execute(config).unwrap();
+    let output = report_to_string(&report);
+    assert!(output.contains(repo_path.to_str().unwrap()));
+}
+
+#[test]
+fn test_staged_with_changes() {
+    let mut env = TestEnv::new();
+    env.create_repo("repo-staged")
+        .stage("staged.txt", "content")
+        .build();
+
+    let config = env.config();
+    let repo_path = env.tempdir.path().join("repo-staged");
+
+    let report = subcommands::staged::execute(config).unwrap();
+    let output = report_to_string(&report);
+    assert!(output.contains(repo_path.to_str().unwrap()));
+}
+
+#[test]
+fn test_ignore_and_ignored() {
+    let env = TestEnv::new();
+    let config = git_global::Config::new();
+
+    // Verify isolation: Config::new() should use the temp HOME set by TestEnv.
+    assert_eq!(config.basedir, env.tempdir.path());
+
+    subcommands::ignore::execute(config, "my-pattern").unwrap();
+
+    let config = git_global::Config::new();
+    let report = subcommands::ignored::execute(config).unwrap();
+    let output = report_to_string(&report);
+    assert!(output.contains("my-pattern"));
 }

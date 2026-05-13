@@ -12,10 +12,8 @@ pub struct Repo {
 }
 
 impl Repo {
-    pub fn new(path: String) -> Repo {
-        Repo {
-            path: PathBuf::from(path),
-        }
+    pub fn new<P: Into<PathBuf>>(path: P) -> Repo {
+        Repo { path: path.into() }
     }
 
     /// Returns the `git2::Repository` equivalent of this repo.
@@ -152,6 +150,75 @@ fn get_short_format_status(status: ::git2::Status) -> String {
         istatus = 'C';
         wstatus = 'C';
     }
-    // TODO: handle submodule statuses?
     format!("{}{}", istatus, wstatus)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils::TestEnv;
+
+    #[test]
+    fn test_is_ahead() {
+        let mut env = TestEnv::new();
+        let repo_path = env.tempdir.path().join("repo_ahead");
+        let repo = Repo::new(repo_path);
+
+        // Create repo, commit, setup remote.
+        // At this point, local and remote are in sync.
+        env.create_repo("repo_ahead")
+            .commit("file.txt", "content")
+            .setup_remote()
+            .build();
+
+        assert!(!repo.is_ahead());
+
+        // Commit again locally. Now ahead of remote.
+        env.create_repo("repo_ahead")
+            .commit("file.txt", "new content")
+            .build();
+
+        assert!(repo.is_ahead());
+    }
+
+    #[test]
+    fn test_get_status_lines() {
+        let mut env = TestEnv::new();
+        let repo_path = env.tempdir.path().join("repo_status");
+        let repo = Repo::new(repo_path);
+
+        env.create_repo("repo_status")
+            .commit("initial.txt", "content")
+            .stage("staged.txt", "new file")
+            .unstaged("unstaged.txt", "untracked file")
+            .build();
+
+        let mut opts = git2::StatusOptions::new();
+        opts.include_untracked(true);
+        let lines = repo.get_status_lines(opts);
+
+        assert!(lines.iter().any(|l| l.starts_with("A  staged.txt")));
+        assert!(lines.iter().any(|l| l.starts_with("?? unstaged.txt")));
+    }
+
+    #[test]
+    fn test_get_stash_list() {
+        let mut env = TestEnv::new();
+        let repo_path = env.tempdir.path().join("repo_stash");
+        let repo = Repo::new(repo_path);
+
+        env.create_repo("repo_stash")
+            .commit("file.txt", "content")
+            .unstaged("file.txt", "modified")
+            .stash("stash 1")
+            .unstaged("file.txt", "modified again")
+            .stash("stash 2")
+            .build();
+
+        let stashes = repo.get_stash_list();
+        assert_eq!(stashes.len(), 2);
+        // Stashes are usually LIFO, so stash 2 is at index 0
+        assert!(stashes[0].contains("stash 2"));
+        assert!(stashes[1].contains("stash 1"));
+    }
 }

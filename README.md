@@ -112,6 +112,10 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* (next)
+  * Implement `TestEnv` and `RepoBuilder` testing infrastructure for realistic git states.
+  * Add comprehensive unit tests for `is_ahead`, `get_status_lines`, and `get_stash_list`.
+  * Add integration tests for `ahead`, `staged`, `ignore`, and `ignored` subcommands.
 * 0.7.0 (2026-02-01)
   * Add the `ignore` and `ignored` subcommands. Thanks, @justinabrahms!
   * Limit subcommand parallelism to CPU core count. Thanks, @justinabrahms!
