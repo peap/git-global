@@ -49,7 +49,7 @@ version = "4"
 features = ["cargo"]
 
 [dependencies.git2]
-version = "0.20"
+version = "0.21"
 default-features = false  # don't need SSH/HTTPS
 
 [dependencies.man]
