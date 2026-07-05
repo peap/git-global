@@ -5,9 +5,9 @@ use crate::errors::{GitGlobalError, Result};
 use crate::report::Report;
 
 /// Adds the given pattern to global.ignore in gitconfig.
-pub fn execute(_config: Config, pattern: &str) -> Result<Report> {
+pub fn execute(config: Config, pattern: &str) -> Result<Report> {
     let mut report = Report::new(&[]);
-    match Config::add_ignore_pattern(pattern) {
+    match config.add_ignore_pattern(pattern) {
         Ok(()) => {
             report.add_message(format!(
                 "Added '{}' to global.ignore. Run `git global scan` to update the cache.",

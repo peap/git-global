@@ -12,6 +12,14 @@ use crate::subcommands;
 pub fn get_clap_app() -> Command {
     command!()
         .arg(
+            Arg::new("config")
+                .short('c')
+                .long("config")
+                .value_name("FILE")
+                .global(true)
+                .help("Read configuration from FILE instead of the default gitconfig."),
+        )
+        .arg(
             Arg::new("verbose")
                 .short('v')
                 .long("verbose")
@@ -58,6 +66,14 @@ pub fn get_clap_app() -> Command {
                                 .index(1),
                         );
                     }
+                    if *cmd == "scan" {
+                        subcmd = subcmd.arg(
+                            Arg::new("paths")
+                                .help("Additional directories to scan for git repos")
+                                .num_args(0..)
+                                .value_name("PATH"),
+                        );
+                    }
                     subcmd
                 }),
         )
@@ -83,17 +99,28 @@ fn merge_args_with_config(config: &mut Config, matches: &ArgMatches) {
 pub fn run_from_command_line() -> i32 {
     let clap_app = get_clap_app();
     let matches = clap_app.get_matches();
-    let mut config = Config::new();
+    let mut config = match matches.get_one::<String>("config") {
+        Some(path) => Config::from_gitconfig(path),
+        None => Config::new(),
+    };
     merge_args_with_config(&mut config, &matches);
 
     // Extract additional arguments for subcommands that need them
-    let args = matches.subcommand().and_then(|(name, sub_matches)| {
-        if name == "ignore" {
-            sub_matches.get_one::<String>("pattern").map(|s| s.as_str())
-        } else {
-            None
-        }
-    });
+    let args: Vec<String> = matches
+        .subcommand()
+        .map(|(name, sub_matches)| match name {
+            "ignore" => sub_matches
+                .get_one::<String>("pattern")
+                .cloned()
+                .into_iter()
+                .collect(),
+            "scan" => sub_matches
+                .get_many::<String>("paths")
+                .map(|v| v.cloned().collect())
+                .unwrap_or_default(),
+            _ => vec![],
+        })
+        .unwrap_or_default();
 
     let report = subcommands::run(matches.subcommand_name(), config, args);
     let use_json = matches.get_flag("json");

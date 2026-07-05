@@ -23,8 +23,9 @@ to:
 * `git global install-manpage`: (non-functional) attempt to install
   git-global's manpage
 * `git global list`: show list of all known repos
-* `git global scan`: update the cache of known repos by searching your
-  filesystem
+* `git global scan [PATH...]`: update the cache of known repos by searching
+  your filesystem. Optionally pass additional directories to scan beyond the
+  configured base directory.
 * `git global staged`: show status of the git index for repos with such changes
 * `git global stashed`: show stashes for all repos that have them
 * `git global status`: show `git status -s` for all your repos with any changes
@@ -36,6 +37,10 @@ to:
 In addition to config-file-based options, there are a set of global
 command-line flags that take precedence:
 
+* `--config <FILE>` (`-c`): Read configuration from `FILE` instead of the
+  default `~/.gitconfig`. Settings like `global.basedir` and `global.ignore`
+  are read from the specified file. Useful for maintaining separate
+  configurations or in isolated environments.
 * `--json`: Print subcommand results in a JSON format.
 * `--untracked`: Show untracked files in subcommand results, e.g., for the
   `status`, `staged`, and `unstaged` subcommands.
@@ -112,7 +117,13 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
-* (next)
+* 0.7.1 (2026-07-05)
+  * Add `--config <FILE>` (`-c`) flag to read settings from an alternate
+    gitconfig file.
+  * Add optional path arguments to `git global scan` for scanning additional
+    directories beyond the configured base directory.
+  * Add `Config::from_gitconfig()` API for library consumers to specify a
+    custom gitconfig file.
   * Implement `TestEnv` and `RepoBuilder` testing infrastructure for realistic git states.
   * Add comprehensive unit tests for `is_ahead`, `get_status_lines`, and `get_stash_list`.
   * Add integration tests for `ahead`, `staged`, `ignore`, and `ignored` subcommands.

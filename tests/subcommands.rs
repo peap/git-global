@@ -7,8 +7,8 @@ use std::path::PathBuf;
 use clap::crate_version;
 use regex::{Regex, escape};
 
-use git_global::{Report, subcommands};
 use git_global::test_utils::TestEnv;
+use git_global::{Report, subcommands};
 
 fn report_to_string(report: &Report) -> String {
     let mut out = Cursor::new(Vec::new());
@@ -90,7 +90,7 @@ fn test_list() {
 #[test]
 fn test_scan() {
     utils::with_base_dir_of_three_repos(|config| {
-        let report = subcommands::scan::execute(config).unwrap();
+        let report = subcommands::scan::execute(config, vec![]).unwrap();
         // There is one global message about the three repos we found.
         assert_eq!(
             report_to_string(&report),
@@ -170,14 +170,16 @@ fn test_staged_with_changes() {
 #[test]
 fn test_ignore_and_ignored() {
     let env = TestEnv::new();
-    let config = git_global::Config::new();
+    let gitconfig_path = env.write_gitconfig();
 
-    // Verify isolation: Config::new() should use the temp HOME set by TestEnv.
+    let config = git_global::Config::from_gitconfig(&gitconfig_path);
+
+    // Verify isolation: basedir should come from the gitconfig we wrote.
     assert_eq!(config.basedir, env.tempdir.path());
 
     subcommands::ignore::execute(config, "my-pattern").unwrap();
 
-    let config = git_global::Config::new();
+    let config = git_global::Config::from_gitconfig(&gitconfig_path);
     let report = subcommands::ignored::execute(config).unwrap();
     let output = report_to_string(&report);
     assert!(output.contains("my-pattern"));

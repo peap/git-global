@@ -13,7 +13,9 @@ pub struct Repo {
 
 impl Repo {
     pub fn new<P: Into<PathBuf>>(path: P) -> Repo {
-        Repo { path: path.into() }
+        Repo {
+            path: path.into(),
+        }
     }
 
     /// Returns the `git2::Repository` equivalent of this repo.
@@ -22,7 +24,7 @@ impl Repo {
             panic!(
                 "Could not open {} as a git repo: {:?}. Perhaps you should run \
                    `git global scan` again.",
-                &self.path.as_path().to_str().unwrap(),
+                self.path.as_path().to_str().unwrap(),
                 e
             )
         })

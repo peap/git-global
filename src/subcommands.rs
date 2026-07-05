@@ -11,6 +11,8 @@ pub mod stashed;
 pub mod status;
 pub mod unstaged;
 
+use std::path::PathBuf;
+
 use crate::config::Config;
 use crate::errors::{GitGlobalError, Result};
 use crate::report::Report;
@@ -19,17 +21,21 @@ use crate::report::Report;
 ///
 /// If `None` is given for the optional subcommand, run `config.default_cmd`.
 /// Else, try to match the given `&str` to a known subcommand.
-/// The `args` parameter is used for subcommands that require additional arguments.
+/// The `args` parameter carries additional positional arguments for
+/// subcommands that accept them (e.g. `ignore`, `scan`).
 pub fn run(
     maybe_subcmd: Option<&str>,
     config: Config,
-    args: Option<&str>,
+    args: Vec<String>,
 ) -> Result<Report> {
     let command = maybe_subcmd.unwrap_or(&config.default_cmd);
     match command {
         "info" => info::execute(config),
         "list" => list::execute(config),
-        "scan" => scan::execute(config),
+        "scan" => {
+            let paths = args.into_iter().map(PathBuf::from).collect();
+            scan::execute(config, paths)
+        }
         "staged" => staged::execute(config),
         "stashed" => stashed::execute(config),
         "status" => status::execute(config),
@@ -37,12 +43,12 @@ pub fn run(
         "ahead" => ahead::execute(config),
         "install-manpage" => install_manpage::execute(config),
         "ignore" => {
-            let path = args.ok_or_else(|| {
+            let pattern = args.into_iter().next().ok_or_else(|| {
                 GitGlobalError::BadSubcommand(
-                    "ignore requires a path argument".to_string(),
+                    "ignore requires a pattern argument".to_string(),
                 )
             })?;
-            ignore::execute(config, path)
+            ignore::execute(config, &pattern)
         }
         "ignored" => ignored::execute(config),
         cmd => Err(GitGlobalError::BadSubcommand(cmd.to_string())),

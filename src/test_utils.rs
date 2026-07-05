@@ -1,23 +1,25 @@
-use std::env;
-use std::fs::{create_dir_all, File};
+use crate::Config;
+use std::fs::{File, create_dir_all};
 use std::io::Write;
 use std::path::PathBuf;
 use tempfile::TempDir;
-use crate::Config;
 
 pub struct TestEnv {
     pub tempdir: TempDir,
-    old_home: Option<PathBuf>,
+}
+
+impl Default for TestEnv {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl TestEnv {
     pub fn new() -> Self {
         let tempdir = TempDir::new().unwrap();
-        let old_home = env::var_os("HOME").map(PathBuf::from);
-        unsafe {
-            env::set_var("HOME", tempdir.path());
+        TestEnv {
+            tempdir,
         }
-        TestEnv { tempdir, old_home }
     }
 
     pub fn create_repo(&mut self, name: &str) -> RepoBuilder<'_> {
@@ -35,36 +37,20 @@ impl TestEnv {
         }
     }
 
+    pub fn write_gitconfig(&self) -> PathBuf {
+        let gitconfig_path = self.tempdir.path().join(".gitconfig");
+        let mut f = File::create(&gitconfig_path).unwrap();
+        writeln!(f, "[global]\n\tbasedir = {}", self.tempdir.path().display())
+            .unwrap();
+        gitconfig_path
+    }
+
     pub fn config(&self) -> Config {
-        Config {
-            basedir: self.tempdir.path().to_path_buf(),
-            follow_symlinks: true,
-            same_filesystem: true,
-            ignored_patterns: vec![],
-            default_cmd: "status".to_string(),
-            verbose: false,
-            show_untracked: true,
-            cache_file: Some(self.tempdir.path().join("repos.txt")),
-            manpage_file: None,
-        }
-    }
-}
-
-impl Default for TestEnv {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Drop for TestEnv {
-    fn drop(&mut self) {
-        unsafe {
-            if let Some(old_home) = &self.old_home {
-                env::set_var("HOME", old_home);
-            } else {
-                env::remove_var("HOME");
-            }
-        }
+        let gitconfig_path = self.write_gitconfig();
+        let mut config = Config::from_gitconfig(&gitconfig_path);
+        config.cache_file = Some(self.tempdir.path().join("repos.txt"));
+        config.manpage_file = None;
+        config
     }
 }
 
@@ -132,7 +118,9 @@ impl<'a> RepoBuilder<'a> {
         repo.remote("origin", remote_path.to_str().unwrap())
             .unwrap();
         let mut remote = repo.find_remote("origin").unwrap();
-        remote.push(&["refs/heads/master:refs/heads/master"], None).unwrap();
+        remote
+            .push(&["refs/heads/master:refs/heads/master"], None)
+            .unwrap();
         self
     }
 

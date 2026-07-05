@@ -83,6 +83,11 @@ pub struct Config {
     /// Default: `git-global.1` in the relevant manpages directory, if we
     /// understand where that should be for the host system.
     pub manpage_file: Option<PathBuf>,
+
+    /// Path to the gitconfig file to use for reading/writing settings.
+    ///
+    /// `None` means use the default global gitconfig.
+    git_config_path: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -95,7 +100,23 @@ impl Config {
     /// Create a new `Config` with the default behavior, first checking global
     /// git config options in ~/.gitconfig, then using defaults:
     pub fn new() -> Self {
-        // Find the user's home directory.
+        Self::build(None)
+    }
+
+    /// Create a new `Config` reading settings from the given gitconfig file.
+    ///
+    /// Settings like `global.basedir`, `global.ignore`, etc. are read from
+    /// the specified file instead of the system default `~/.gitconfig`.
+    /// The default basedir still falls back to `$HOME` if `global.basedir`
+    /// is not set in the file.
+    pub fn from_gitconfig(path: impl Into<PathBuf>) -> Self {
+        Self::build(Some(path.into()))
+    }
+
+    /// Shared constructor: builds a `Config`, optionally reading settings
+    /// from an explicit gitconfig path instead of the system default.
+    fn build(git_config_path: Option<PathBuf>) -> Self {
+        // Find the user's home directory (used as the default basedir).
         let homedir = UserDirs::new()
             .expect("Could not determine home directory.")
             .home_dir()
@@ -115,8 +136,13 @@ impl Config {
             }),
             _ => None,
         };
-        match ::git2::Config::open_default() {
-            Ok(cfg) => Config {
+        // Open the gitconfig: either from the explicit path or the system default.
+        let git_cfg = match &git_config_path {
+            Some(path) => git2::Config::open(path).ok(),
+            None => git2::Config::open_default().ok(),
+        };
+        match git_cfg {
+            Some(cfg) => Config {
                 basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
                 follow_symlinks: cfg
                     .get_bool(SETTING_FOLLOW_SYMLINKS)
@@ -129,6 +155,7 @@ impl Config {
                     .unwrap_or_default()
                     .split(',')
                     .map(|p| p.trim().to_string())
+                    .filter(|p| !p.is_empty())
                     .collect(),
                 default_cmd: cfg
                     .get_string(SETTING_DEFAULT_CMD)
@@ -141,8 +168,9 @@ impl Config {
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
                 cache_file,
                 manpage_file,
+                git_config_path,
             },
-            Err(_) => {
+            None => {
                 // Build the default configuration.
                 Config {
                     basedir: homedir,
@@ -154,6 +182,7 @@ impl Config {
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
                     cache_file,
                     manpage_file,
+                    git_config_path,
                 }
             }
         }
@@ -162,10 +191,22 @@ impl Config {
     /// Returns all known git repos, populating the cache first, if necessary.
     pub fn get_repos(&mut self) -> Vec<Repo> {
         if !self.has_cache() {
-            let repos = self.find_repos();
+            let repos = self.find_repos(&[]);
             self.cache_repos(&repos);
         }
         self.get_cached_repos()
+    }
+
+    /// Clears the cache, scans basedir and any extra paths, caches the
+    /// results, and returns the combined list of repos.
+    pub fn scan_with_extra_paths(
+        &mut self,
+        extra_paths: &[PathBuf],
+    ) -> Vec<Repo> {
+        self.clear_cache();
+        let repos = self.find_repos(extra_paths);
+        self.cache_repos(&repos);
+        repos
     }
 
     /// Clears the cache of known git repos, forcing a re-scan on the next
@@ -191,15 +232,27 @@ impl Config {
         }
     }
 
-    /// Walks the configured base directory, looking for git repos.
-    fn find_repos(&self) -> Vec<Repo> {
+    /// Walks the configured base directory (and any extra roots), looking for
+    /// git repos.
+    fn find_repos(&self, extra_roots: &[PathBuf]) -> Vec<Repo> {
         let mut repos = Vec::new();
+        self.scan_root(&self.basedir.clone(), &mut repos);
+        for root in extra_roots {
+            self.scan_root(root, &mut repos);
+        }
+        repos.sort_by_key(|r| r.path());
+        repos.dedup_by_key(|r| r.path());
+        repos
+    }
+
+    /// Walks a single root directory, appending discovered repos to `repos`.
+    fn scan_root(&self, root: &Path, repos: &mut Vec<Repo>) {
         println!(
             "Scanning for git repos under {}; this may take a while...",
-            self.basedir.display()
+            root.display()
         );
         let mut n_dirs = 0;
-        let walker = WalkDir::new(&self.basedir)
+        let walker = WalkDir::new(root)
             .follow_links(self.follow_symlinks)
             .same_file_system(self.same_filesystem);
         for entry in walker
@@ -243,8 +296,6 @@ impl Config {
         if self.verbose {
             println!();
         }
-        repos.sort_by_key(|r| r.path());
-        repos
     }
 
     /// Returns boolean indicating if the cache file exists.
@@ -291,9 +342,15 @@ impl Config {
     }
 
     /// Adds a pattern to the global.ignore setting in gitconfig.
-    pub fn add_ignore_pattern(pattern: &str) -> Result<(), String> {
-        let mut cfg = git2::Config::open_default()
-            .map_err(|e| format!("Could not open git config: {}", e))?;
+    ///
+    /// Uses the gitconfig path that was determined when this `Config` was
+    /// created (explicit path for `from_homedir`, system default for `new`).
+    pub fn add_ignore_pattern(&self, pattern: &str) -> Result<(), String> {
+        let mut cfg = match &self.git_config_path {
+            Some(path) => git2::Config::open(path),
+            None => git2::Config::open_default(),
+        }
+        .map_err(|e| format!("Could not open git config: {}", e))?;
 
         // Get current patterns
         let current = cfg.get_string(SETTING_IGNORE).unwrap_or_default();
