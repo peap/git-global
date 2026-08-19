@@ -39,8 +39,9 @@ impl TestEnv {
 
     pub fn write_gitconfig(&self) -> PathBuf {
         let gitconfig_path = self.tempdir.path().join(".gitconfig");
-        let mut f = File::create(&gitconfig_path).unwrap();
-        writeln!(f, "[global]\n\tbasedir = {}", self.tempdir.path().display())
+        File::create(&gitconfig_path).unwrap();
+        let mut cfg = git2::Config::open(&gitconfig_path).unwrap();
+        cfg.set_str("global.basedir", self.tempdir.path().to_str().unwrap())
             .unwrap();
         gitconfig_path
     }
