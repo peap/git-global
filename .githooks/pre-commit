@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pre-commit hook to ensure doc/git-global.1 is up to date.
+
+cargo run install-manpage --dest doc/git-global.1
+if ! git diff --exit-code doc/git-global.1 >/dev/null 2>&1; then
+    echo "Error: doc/git-global.1 was out of date and has been regenerated." >&2
+    echo "Please stage the updated file ('git add doc/git-global.1') and commit again." >&2
+    exit 1
+fi

@@ -24,6 +24,7 @@ const DEFAULT_FOLLOW_SYMLINKS: bool = true;
 const DEFAULT_SAME_FILESYSTEM: bool = cfg!(any(unix, windows));
 const DEFAULT_VERBOSE: bool = false;
 const DEFAULT_SHOW_UNTRACKED: bool = true;
+const DEFAULT_AUTO_INSTALL_MANPAGE: bool = true;
 
 const SETTING_BASEDIR: &str = "global.basedir";
 const SETTING_FOLLOW_SYMLINKS: &str = "global.follow-symlinks";
@@ -32,6 +33,8 @@ const SETTING_IGNORE: &str = "global.ignore";
 const SETTING_DEFAULT_CMD: &str = "global.default-cmd";
 const SETTING_SHOW_UNTRACKED: &str = "global.show-untracked";
 const SETTING_VERBOSE: &str = "global.verbose";
+const SETTING_AUTO_INSTALL_MANPAGE: &str = "global.auto-install-manpage";
+const SETTING_MANPAGE_FILE: &str = "global.manpage-file";
 
 /// A container for git-global configuration options.
 #[derive(Clone, Debug)]
@@ -84,6 +87,11 @@ pub struct Config {
     /// understand where that should be for the host system.
     pub manpage_file: Option<PathBuf>,
 
+    /// Whether to automatically install the manpage on first run if missing.
+    ///
+    /// Default: true
+    pub auto_install_manpage: bool,
+
     /// Path to the gitconfig file to use for reading/writing settings.
     ///
     /// `None` means use the default global gitconfig.
@@ -125,22 +133,27 @@ impl Config {
         let cache_file =
             ProjectDirs::from(QUALIFIER, ORGANIZATION, APPLICATION)
                 .map(|project_dirs| project_dirs.cache_dir().join(CACHE_FILE));
-        let manpage_file = match env::consts::OS {
-            // Consider ~/.local/share/man/man1/, too.
-            "linux" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
-            "macos" => Some(PathBuf::from("/usr/share/man/man1/git-global.1")),
-            "windows" => env::var("MSYSTEM").ok().and_then(|val| {
-                (val == "MINGW64").then(|| {
-                    PathBuf::from("/mingw64/share/doc/git-doc/git-global.html")
-                })
-            }),
-            _ => None,
-        };
+        let default_manpage_file = Some(
+            homedir
+                .join(".local")
+                .join("share")
+                .join("man")
+                .join("man1")
+                .join("git-global.1"),
+        );
         // Open the gitconfig: either from the explicit path or the system default.
         let git_cfg = match &git_config_path {
             Some(path) => git2::Config::open(path).ok(),
             None => git2::Config::open_default().ok(),
         };
+        let manpage_file = git_cfg
+            .as_ref()
+            .and_then(|cfg| cfg.get_path(SETTING_MANPAGE_FILE).ok())
+            .or(default_manpage_file);
+        let auto_install_manpage = git_cfg
+            .as_ref()
+            .and_then(|cfg| cfg.get_bool(SETTING_AUTO_INSTALL_MANPAGE).ok())
+            .unwrap_or(DEFAULT_AUTO_INSTALL_MANPAGE);
         match git_cfg {
             Some(cfg) => Config {
                 basedir: cfg.get_path(SETTING_BASEDIR).unwrap_or(homedir),
@@ -166,6 +179,7 @@ impl Config {
                 show_untracked: cfg
                     .get_bool(SETTING_SHOW_UNTRACKED)
                     .unwrap_or(DEFAULT_SHOW_UNTRACKED),
+                auto_install_manpage,
                 cache_file,
                 manpage_file,
                 git_config_path,
@@ -180,6 +194,7 @@ impl Config {
                     default_cmd: String::from(DEFAULT_CMD),
                     verbose: DEFAULT_VERBOSE,
                     show_untracked: DEFAULT_SHOW_UNTRACKED,
+                    auto_install_manpage,
                     cache_file,
                     manpage_file,
                     git_config_path,
@@ -376,5 +391,40 @@ impl Config {
             .map_err(|e| format!("Could not update git config: {}", e))?;
 
         Ok(())
+    }
+
+    /// Automatically installs or updates the manpage if `auto_install_manpage`
+    /// is enabled, a destination is known, and the file is missing or contains
+    /// an older version of git-global.
+    pub fn maybe_auto_install_manpage(&self) {
+        if !self.auto_install_manpage {
+            return;
+        }
+        if let Some(manpage_file) = &self.manpage_file {
+            let is_missing = !manpage_file.exists();
+            let needs_write = is_missing
+                || std::fs::read_to_string(manpage_file)
+                    .map(|content| !content.contains(clap::crate_version!()))
+                    .unwrap_or(true);
+            if needs_write {
+                if let Some(parent) = manpage_file.parent()
+                    && !parent.as_os_str().is_empty()
+                {
+                    let _ = create_dir_all(parent);
+                }
+                if let Ok(mut file) = File::create(manpage_file) {
+                    let app = crate::cli::get_clap_app();
+                    if clap_mangen::Man::new(app).render(&mut file).is_ok() {
+                        let action =
+                            if is_missing { "Installed" } else { "Updated" };
+                        eprintln!(
+                            "{} manpage to {}",
+                            action,
+                            manpage_file.display()
+                        );
+                    }
+                }
+            }
+        }
     }
 }

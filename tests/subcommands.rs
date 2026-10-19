@@ -40,18 +40,18 @@ fn test_info() {
         let report = subcommands::info::execute(config).unwrap();
         let expected = vec![
             format!(r"^git-global {}$", crate_version!()),
-            format!(r"^============+"),
-            format!(r"^Number of repos: 3$"),
+            r"^============+".to_string(),
+            r"^Number of repos: 3$".to_string(),
             format!(r"^Base directory: {}$", escape(basedir.to_str().unwrap())),
-            format!(r"^Ignored patterns:$"),
-            format!(r"^Default command: status$"),
-            format!(r"^Verbose: false$"),
-            format!(r"^Show untracked: true$"),
+            r"^Ignored patterns:$".to_string(),
+            r"^Default command: status$".to_string(),
+            r"^Verbose: false$".to_string(),
+            r"^Show untracked: true$".to_string(),
             format!(r"^Cache file: {}$", escape(&cache)),
-            format!(r"^Cache file age: 0d, 0h, 0m, .s$"),
+            r"^Cache file age: 0d, 0h, 0m, .s$".to_string(),
             format!(r"^Manpage file: {}$", escape(&manpage)),
             format!(r"^Detected OS: {}$", escape(env::consts::OS)),
-            format!(r"^$"),
+            r"^$".to_string(),
         ];
         let output = report_to_string(&report);
         for (i, line) in output.lines().enumerate() {
@@ -183,4 +183,57 @@ fn test_ignore_and_ignored() {
     let report = subcommands::ignored::execute(config).unwrap();
     let output = report_to_string(&report);
     assert!(output.contains("my-pattern"));
+}
+
+#[test]
+fn test_install_manpage_with_dest() {
+    let env = TestEnv::new();
+    let dest_path = env.tempdir.path().join("manpage.1");
+    let config = env.config();
+
+    let report =
+        subcommands::install_manpage::execute(config, Some(dest_path.clone()))
+            .unwrap();
+    let output = report_to_string(&report);
+    assert!(output.contains("Installed manpage to"));
+    assert!(dest_path.exists());
+    let content = std::fs::read_to_string(&dest_path).unwrap();
+    assert!(content.contains(".TH git-global 1"));
+}
+
+#[test]
+fn test_auto_install_manpage_setting() {
+    let env = TestEnv::new();
+    let mut config = env.config();
+    let dest_path = env.tempdir.path().join("auto_manpage.1");
+
+    // Disabled setting: should not write
+    config.manpage_file = Some(dest_path.clone());
+    config.auto_install_manpage = false;
+    config.maybe_auto_install_manpage();
+    assert!(!dest_path.exists());
+
+    // Enabled setting: should write
+    config.auto_install_manpage = true;
+    config.maybe_auto_install_manpage();
+    assert!(dest_path.exists());
+}
+
+#[test]
+fn test_auto_install_manpage_upgrades() {
+    let env = TestEnv::new();
+    let mut config = env.config();
+    let dest_path = env.tempdir.path().join("upgrade_manpage.1");
+
+    // Write an older version of the manpage
+    std::fs::write(&dest_path, "old manpage version 0.1.0").unwrap();
+
+    config.manpage_file = Some(dest_path.clone());
+    config.auto_install_manpage = true;
+    config.maybe_auto_install_manpage();
+
+    // Verify it was overwritten with current version
+    let updated = std::fs::read_to_string(&dest_path).unwrap();
+    assert!(updated.contains(clap::crate_version!()));
+    assert!(updated.contains(".TH git-global 1"));
 }

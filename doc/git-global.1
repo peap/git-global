@@ -1,73 +1,72 @@
-.TH GIT-GLOBAL 1
+.ie \n(.g .ds Aq \(aq
+.el .ds Aq '
+.TH git-global 1  "git-global 0.8.0" 
 .SH NAME
 git\-global \- Keep track of all the git repositories on your machine.
 .SH SYNOPSIS
-\fBgit\-global\fR [FLAGS]
-.SH FLAGS
+\fBgit\-global\fR [\fB\-c\fR|\fB\-\-config\fR] [\fB\-v\fR|\fB\-\-verbose\fR] [\fB\-j\fR|\fB\-\-json\fR] [\fB\-u\fR|\fB\-\-untracked\fR] [\fB\-t\fR|\fB\-\-nountracked\fR] [\fB\-h\fR|\fB\-\-help\fR] [\fB\-V\fR|\fB\-\-version\fR] [\fIsubcommands\fR]
+.SH DESCRIPTION
+Keep track of all the git repositories on your machine.
+.SH OPTIONS
 .TP
-\fBc\fR, \fBconfig\fR
+\fB\-c\fR, \fB\-\-config\fR \fI<FILE>\fR
 Read configuration from FILE instead of the default gitconfig.
-
 .TP
-\fBv\fR, \fBverbose\fR
+\fB\-v\fR, \fB\-\-verbose\fR
 Enable verbose mode.
-
 .TP
-\fBj\fR, \fBjson\fR
+\fB\-j\fR, \fB\-\-json\fR
 Output subcommand results in JSON.
-
 .TP
-\fBu\fR, \fBuntracked\fR
+\fB\-u\fR, \fB\-\-untracked\fR
 Show untracked files in output.
-
 .TP
-\fBt\fR, \fBnountracked\fR
-Don't show untracked files in output.
-.SH VERSION
-Crate version 0.7.1
-
-
+\fB\-t\fR, \fB\-\-nountracked\fR
+Don\*(Aqt show untracked files in output.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help
+.TP
+\fB\-V\fR, \fB\-\-version\fR
+Print version
 .SH SUBCOMMANDS
-The following subcommands are supported by git global; use git's global config to set your default choice.
-
-ahead: Shows repos with changes that are not pushed to a remote
-
-ignore: Ignores a repo, removing it from the list
-
-ignored: Lists all ignored repos
-
-info: Shows meta\-information about git\-global
-
-install\-manpage: Attempts to install git\-global's man page
-
-list: Lists all known repos
-
-scan: Updates cache of known repos
-
-staged: Shows git index status for repos with staged changes
-
-stashed: Shows repos with stashed changes
-
-status: Shows status (`git status \-s`) for repos with any changes
-
-unstaged: Shows working dir status for repos with unstaged changes
-
-
-.SH EXIT STATUS
 .TP
-\fB0\fR
-Successful program execution.
-
+git\-global\-ahead(1)
+Shows repos with changes that are not pushed to a remote
 .TP
-\fB1\fR
-Unsuccessful program execution.
-
+git\-global\-ignore(1)
+Ignores a repo, removing it from the list
 .TP
-\fB101\fR
-The program panicked.
-.SH AUTHOR
-.P
-.RS 2
-.nf
+git\-global\-ignored(1)
+Lists all ignored repos
+.TP
+git\-global\-info(1)
+Shows meta\-information about git\-global
+.TP
+git\-global\-install\-manpage(1)
+Attempts to install git\-global\*(Aqs man page
+.TP
+git\-global\-list(1)
+Lists all known repos
+.TP
+git\-global\-scan(1)
+Updates cache of known repos
+.TP
+git\-global\-staged(1)
+Shows git index status for repos with staged changes
+.TP
+git\-global\-stashed(1)
+Shows repos with stashed changes
+.TP
+git\-global\-status(1)
+Shows status (`git status \-s`) for repos with any changes
+.TP
+git\-global\-unstaged(1)
+Shows working dir status for repos with unstaged changes
+.TP
+git\-global\-help(1)
+Print this message or the help of the given subcommand(s)
+.SH VERSION
+v0.8.0
+.SH AUTHORS
 Eric Petersen <eric@ericpetersen.io>
-

@@ -74,6 +74,14 @@ pub fn get_clap_app() -> Command {
                                 .value_name("PATH"),
                         );
                     }
+                    if *cmd == "install-manpage" {
+                        subcmd = subcmd.arg(
+                            Arg::new("dest")
+                                .long("dest")
+                                .value_name("PATH")
+                                .help("Custom file path to write the man page to"),
+                        );
+                    }
                     subcmd
                 }),
         )
@@ -104,6 +112,7 @@ pub fn run_from_command_line() -> i32 {
         None => Config::new(),
     };
     merge_args_with_config(&mut config, &matches);
+    config.maybe_auto_install_manpage();
 
     // Extract additional arguments for subcommands that need them
     let args: Vec<String> = matches
@@ -118,6 +127,11 @@ pub fn run_from_command_line() -> i32 {
                 .get_many::<String>("paths")
                 .map(|v| v.cloned().collect())
                 .unwrap_or_default(),
+            "install-manpage" => sub_matches
+                .get_one::<String>("dest")
+                .cloned()
+                .into_iter()
+                .collect(),
             _ => vec![],
         })
         .unwrap_or_default();

@@ -7,12 +7,11 @@
 Use `git-global` to keep track of all the git repositories on your machine.
 
 This is a Rust program that you can install with `cargo install git-global`.
-(To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you can
-optionally install the manpage with `git global install-manpage`
+(To obtain `cargo` and Rust, see https://rustup.rs.) Once installed, you gain
+an extra git subcommand that you can run from anywhere to check up on all your
+git repos: `git global`.
 
-Once installed, you gain an extra git subcommand that you can run from anywhere
-to check up on all your git repos: `git global`.  Use `git global <subcommand>`
-to:
+Use `git global <subcommand>` to:
 
 * `git global ahead`: show repos where branches contain commits that are not
   present on any of the remotes
@@ -20,8 +19,8 @@ to:
 * `git global ignored`: show the list of ignored patterns
 * `git global info`: show meta-information about git-global itself
   (configuration, number of known repos, etc.)
-* `git global install-manpage`: (non-functional) attempt to install
-  git-global's manpage
+* `git global install-manpage`: install git-global's manpage to
+  `~/.local/share/man/man1/` (or a custom path with `--dest`)
 * `git global list`: show list of all known repos
 * `git global scan [PATH...]`: update the cache of known repos by searching
   your filesystem. Optionally pass additional directories to scan beyond the
@@ -83,15 +82,28 @@ The full list of configuration options supported in the `global` section of
 * `show-untracked`: Whether to include untracked files in output (default:
   `true`)
 * `verbose`: Whether to be more verbose in certain subcommands.
+* `auto-install-manpage`: Whether to automatically install the manpage on first
+  run if missing (default: `true`). Set to `false` to prevent automatic
+  installation.
+* `manpage-file`: Custom path to install the manpage to (default:
+  `~/.local/share/man/man1/git-global.1`).
 
 ## Manpage generation
 
 An up-to-date copy of the manpage lives in the repository at
-[doc/git-global.1](doc/git-global.1). To generate it from a local clone of the
+[doc/git-global.1](doc/git-global.1). To regenerate it from a local clone of the
 repo, run:
 
 ```
-cargo run --bin generate-manpage --features=manpage > doc/git-global.1
+cargo run install-manpage --dest doc/git-global.1
+```
+
+### Pre-commit hook
+
+To ensure the manpage stays synchronized with the CLI definitions before committing, enable the repository's pre-commit hook:
+
+```
+git config core.hooksPath .githooks
 ```
 
 ## Ideas
@@ -117,6 +129,14 @@ The following are some ideas about future subcommands and features:
 
 ## Release Notes
 
+* 0.8.0 (2026-10-19)
+  * Implement the `install-manpage` subcommand, and make manpage installation
+    mostly automatic ([#5](https://github.com/peap/git-global/pull/5)).
+    `git-global` will now attempt to install its manpage into a user-writable
+    location whenever any subcommand is invoked, unless otherwise configured.
+  * Remove the `generate-manpage` binary; the `install-manpage` subcommand
+    performs the same function now.
+  * Add a pre-commit githook to keep the repo's copy of the manpage up-to-date.
 * 0.7.1 (2026-07-05)
   * Add `--config <FILE>` (`-c`) flag to read settings from an alternate
     gitconfig file.

@@ -1,29 +1,35 @@
-//! The `install-manpage` subcommand: attempts to install a man page.
+//! The `install-manpage` subcommand: installs the man page.
+
+use std::fs::{File, create_dir_all};
+use std::path::PathBuf;
 
 use crate::config::Config;
 use crate::errors::Result;
 use crate::report::Report;
 
-// TODO(peap): Add option to just generate the file for the user to stick somewhere?
+/// Installs git-global's man page to the configured directory or a custom path.
+pub fn execute(config: Config, dest: Option<PathBuf>) -> Result<Report> {
+    let mut report = Report::new(&[]);
+    let target = dest.or(config.manpage_file);
 
-/// Attempts to install git-global's man page to the relevant directory.
-/// This is a work-around to not maintaining distribution-specific packages
-/// and Cargo not providing this functionality for crates.
-pub fn execute(mut config: Config) -> Result<Report> {
-    let repos = config.get_repos();
-    let mut report = Report::new(&repos);
-    report.add_message("This feature is a work-in-progress.".to_string());
-    report.add_message(
-        "In the meantime, you can find the manpage at \
-         https://raw.githubusercontent.com/peap/git-global/master/doc/git-global.1".to_string()
-    );
-    if let Some(manpage_file) = config.manpage_file {
+    if let Some(target_path) = target {
+        if let Some(parent) = target_path.parent()
+            && !parent.as_os_str().is_empty()
+        {
+            create_dir_all(parent)?;
+        }
+        let mut file = File::create(&target_path)?;
+        let app = crate::cli::get_clap_app();
+        clap_mangen::Man::new(app).render(&mut file)?;
         report.add_message(format!(
-            "...would write file to {}",
-            manpage_file.display()
+            "Installed manpage to {}",
+            target_path.display()
         ));
     } else {
-        report.add_message("...not sure where to put it!".to_string());
+        report.add_message(
+            "Could not determine where to install the manpage on this system."
+                .to_string(),
+        );
     }
     Ok(report)
 }

@@ -41,7 +41,10 @@ pub fn run(
         "status" => status::execute(config),
         "unstaged" => unstaged::execute(config),
         "ahead" => ahead::execute(config),
-        "install-manpage" => install_manpage::execute(config),
+        "install-manpage" => {
+            let dest = args.into_iter().next().map(PathBuf::from);
+            install_manpage::execute(config, dest)
+        }
         "ignore" => {
             let pattern = args.into_iter().next().ok_or_else(|| {
                 GitGlobalError::BadSubcommand(
